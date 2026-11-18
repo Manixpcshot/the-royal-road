@@ -1,0 +1,13 @@
+[Unit]
+Description=The Royal Road web game
+After=network.target
+[Service]
+DynamicUser=yes
+WorkingDirectory=/opt/royal-road
+ExecStart=/usr/bin/node /opt/royal-road/server.mjs
+Environment=HOST=127.0.0.1
+Environment=PORT=3000
+Restart=on-failure
+NoNewPrivileges=true
+[Install]
+WantedBy=multi-user.target

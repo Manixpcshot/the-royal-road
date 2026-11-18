@@ -1,2 +1,20 @@
-# the-royal-road
-شاهراه · A bilingual historical strategy game for cPanel and Node.js VPS.
+# شاهراه · The Royal Road
+
+یک بازی نوبتی تک‌نفره با دو زبان هم‌زمان و رقیب رایانه‌ای. با پیمان و عوارض و دژسازی راهی از شوش به سارد باز کنید. نقشه برای بازی طراحی شده است. ذخیرهٔ بازی در مرورگر همان دستگاه است.
+A bilingual single-player territory campaign inspired by Achaemenid Persia. Connect Susa to Sardis by the end of turn 14. All game resources ship locally, including orthographically rendered 3D city meshes and synthetic dialogue in both languages. Persian uses a device voice when available, otherwise bundled phonetic audio.
+
+## cPanel
+یک پوشهٔ خالی مثل public_html/royal-road بسازید و فایل ZIP مخصوص cPanel را داخل آن Extract کنید. سپس آدرس همان پوشه را با / در انتها باز کنید. index.html باید مستقیماً داخل آن باشد. راه‌اندازی نود یا پایگاه داده لازم نیست.
+Extract the cPanel ZIP into an empty web directory. Open that directory URL with a trailing slash. Include the bundled .htaccess so Apache serves .mjs as JavaScript. Hosts without AllowOverride should configure that MIME mapping in cPanel MIME Types.
+
+## VPS
+به Node.js نسخهٔ ۲۰ یا جدیدتر نیاز دارید. بستهٔ VPS را باز کنید و در پوشهٔ package.json دستور زیر را اجرا کنید. وابستگی خارجی ندارد.
+Extract the VPS archive. From its root, with Node.js 20+ installed, run:
+
+    npm start
+
+By default the service listens at http://127.0.0.1:3000. Point your domain's reverse proxy at this address; /healthz returns ok. For a public listener use HOST=0.0.0.0 PORT=3000 npm start. For automatic restarts, put the extracted files at /opt/royal-road (readable by the service), adjust the node path in royal-road.service to the result of command -v node, copy the unit to /etc/systemd/system/ and run sudo systemctl daemon-reload and sudo systemctl enable --now royal-road.service.
+برای اجرای دائمی، مسیر node را در فایل سرویس تنظیم کنید و سرویس systemd را مطابق دستور بالا فعال کنید.
+
+## Development and release
+Run npm test for the game rule suite. Run python3 scripts/package.py to create deployment archives in dist/. Push a v1.0.0 tag to run the GitHub release workflow. It tests the game, rebuilds the two archives and attaches them to the release.
