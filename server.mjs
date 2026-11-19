@@ -3,7 +3,7 @@ import {readFile,readdir} from 'node:fs/promises';
 import {join,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
 const root=fileURLToPath(new URL('./public/',import.meta.url));
-const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.mp3':'audio/mpeg'};
+const types={'.html':'text/html; charset=utf-8','.css':'text/css; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.mp3':'audio/mpeg','.webp':'image/webp'};
 const assets=new Map();
 async function load(dir=''){
  for(const e of await readdir(join(root,dir),{withFileTypes:true})){

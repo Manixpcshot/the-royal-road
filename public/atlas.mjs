@@ -48,6 +48,14 @@ function terrain(c){
  for(let i=0;i<8;i++){const a=i*Math.PI/4,xx=967,yy=68;const point=(ang,r)=>[xx+Math.sin(ang)*r,yy-Math.cos(ang)*r];polygon(c,[point(a-.4,6),point(a,i%2?13:23),[xx,yy]],'#6d5c43');polygon(c,[[xx,yy],point(a,i%2?13:23),point(a+.4,6)],'#b49b73')}
  c.font='12px Georgia';c.fillText('N',967,37);
 }
+const landmarks=new Map();
+export async function loadLandmarks(){
+ await Promise.all(['palace','fort','tower','market','caravan'].map(async kind=>{
+  const image=new Image();
+  image.src=new URL('./art/'+kind+'.webp',import.meta.url);
+  try{await image.decode();landmarks.set(kind,image)}catch{}
+ }));
+}
 let background;
 export function draw(canvas,s,selected,path=[]){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
@@ -64,10 +72,19 @@ export function draw(canvas,s,selected,path=[]){
   c.strokeStyle='#60402a';c.lineWidth=6;c.stroke();c.strokeStyle='#ffd060';c.lineWidth=3;c.stroke();
  }
  cities.forEach((city,i)=>{const [,,x,y,kind]=city,col=colors[s.owners[i]];c.beginPath();c.ellipse(x,y,24,10,0,0,Math.PI*2);c.fillStyle=i===selected?'#fff2bd':'#93764a55';c.fill();if(i===selected){c.strokeStyle='#237c71';c.lineWidth=2;c.stroke()}
- for(const [face,fill] of cityModel(kind,col,s.walls[i]))polygon(c,face.map(([a,b,z])=>[x+(a-b)*.98,y+(a+b)*.42-z]),fill,'#745e44');
+ const landmark=landmarks.get(kind);
+ if(landmark){
+  const height=kind==='palace'?56:44;
+  const width=height*landmark.width/landmark.height;
+  c.drawImage(landmark,x-width/2,y-height+2,width,height);
+  c.fillStyle=col;c.fillRect(x+15,y-10,3,9);
+  for(let level=0;level<s.walls[i];level++)c.fillRect(x+18+level*4,y-10,3,4);
+ }else for(const [face,fill] of cityModel(kind,col,s.walls[i]))polygon(c,face.map(([a,b,z])=>[x+(a-b)*.98,y+(a+b)*.42-z]),fill,'#745e44');
  });
  if(s.freight){
   const [,,x,y]=cities[s.freight.city];
+  const camels=landmarks.get('caravan');
+  if(camels){c.drawImage(camels,x-59,y-23,40,40*camels.height/camels.width);return}
   c.save();c.translate(x-34,y-5);
   c.fillStyle='#70432c';c.fillRect(-8,-8,18,8);c.fillRect(9,-3,5,2);
   polygon(c,[[-8,-8],[-5,-15],[4,-16],[9,-9]],'#f4cb80','#614932');

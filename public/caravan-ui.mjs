@@ -4,6 +4,13 @@ import {paintStreet} from './streetscape.mjs';
 
 const el=id=>document.getElementById(id);
 const cityName=i=>cities[i][1]+' / '+cities[i][0];
+const cargoArt=['flour','letter','indigo'];
+function illustration(name,style){
+ const image=document.createElement('img');
+ image.src=new URL('./art/'+name+'.webp',import.meta.url);
+ image.alt='';image.className=style;
+ return image;
+}
 function bilingual(pair){
  const box=document.createElement('div'),fa=document.createElement('div'),en=document.createElement('div');
  fa.lang='fa';fa.dir='rtl';fa.textContent=pair[0];en.lang='en';en.className='translation';en.textContent=pair[1];box.append(fa,en);return box;
@@ -13,6 +20,7 @@ function button(label,run,id){
 }
 export function renderCaravan(s,selected,commit,play){
  const [,, , ,kind]=cities[selected];
+ el('council').style.setProperty('--landmark', 'url(./art/'+kind+'.webp)');
  paintStreet(el('streetArt'),selected,kind,s.turn,s.owners[selected],s.walls[selected],s.freight?.city===selected);
  el('streetName').textContent=cityName(selected);
  const detail=el('streetText');detail.replaceChildren(bilingual(streets[selected]));
@@ -28,7 +36,7 @@ export function renderCaravan(s,selected,commit,play){
  if(!f){
   for(const [id,c] of contracts.entries()){
    const done=delivered.includes(id),card=document.createElement('section');
-   card.append(bilingual(c.title));
+   card.append(illustration(cargoArt[id],'cargo-art'),bilingual(c.title));
    const fee=id===0?'3–5':String(c.fee);
    card.append(bilingual(done?[cities[c.to][1],cities[c.to][0]]:[cities[c.to][1]+' · دستمزد '+fee+' سکه',cities[c.to][0]+' · Fee '+fee+' gold']));
    const b=button(done?['تحویل شد','Delivered']:['قبول بار · ۱ فرمان','Accept · 1 order'],()=>{
@@ -39,7 +47,7 @@ export function renderCaravan(s,selected,commit,play){
   return;
  }
  const c=contracts[f.id],pending=f.choice===null,role=pending?c.speaker:c.answer[f.choice];
- const row=document.createElement('section');row.className='conversation';row.append(bilingual(c.title));
+ const row=document.createElement('section');row.className='conversation';row.append(illustration(cargoArt[f.id],'conversation-art'),bilingual(c.title));
  const speaker=document.createElement('small');speaker.textContent=voices[role].join(' / ');row.append(speaker);
  const words=pending?c.opening:c.replies[f.choice];
  row.append(bilingual(words),button(['شنیدن دیالوگ','Hear dialogue'],()=>play(pending?'scene-'+f.id:'reply-'+f.id+'-'+f.choice,words),'hearStory'));

@@ -3,7 +3,7 @@ import {renderCaravan} from './caravan-ui.mjs';
 import {receipts} from './stories.mjs';
 import {recorded} from './performance.mjs';
 import {createNarrator} from './narration.mjs';
-import {draw} from './atlas.mjs';
+import {draw,loadLandmarks} from './atlas.mjs';
 const $=id=>document.getElementById(id);
 const key='royal-road/1'+location.pathname.replace(/\/index\.html$/,'/');
 let planned=false,undoState=null,s=fresh(),selected=11,storageOK=true,voice='fa';
@@ -143,6 +143,7 @@ $('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</
 $('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به سارد وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to Sardis through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p><p dir="rtl">هر قرارداد یک فرمان می‌خواهد. در کاروان‌سرا به صاحب بار پاسخ بده. در پایان هر نوبت، پس از حرکت رقیب، کاروان از راه شهرهای خودی پیش می‌رود. قطع راه کاروان را متوقف می‌کند؛ تصرف محل استقرارش بار را از بین می‌برد. هر قرارداد یک بار دستمزد می‌دهد.</p><p>Accepting freight uses one order. Answer the speaker to send the load. After each rival move, freight travels through friendly cities. A broken route stalls it. Capture of its current stop loses the cargo. Each contract pays once.</p>');
 window.addEventListener('pagehide',()=>narrator.stop());
 render();if(s.result)endScreen();
+loadLandmarks().then(()=>draw($('atlas'),s,selected,planned?itinerary(s).path:[]));
 showSelectedCity();
 
 const layout=document.querySelector('.layout'),panels=$('panels'),fold=$('fold');
