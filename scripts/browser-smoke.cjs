@@ -1,6 +1,7 @@
 // CI provides playwright-core and Chrome. Both tests run against extracted ZIPs.
 const assert = require('node:assert/strict');
-const { chromium } = require('playwright-core');
+const { chromium, firefox } = require('playwright-core');
+const {verifyDialogue}=require('./dialogue-check.cjs');
 
 async function check(browser, url, width) {
   const page = await browser.newPage({viewport:{width,height:900}});
@@ -54,9 +55,11 @@ async function check(browser, url, width) {
   await page.close();
 }
 (async()=>{
- const browser=await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
+ const browser=process.env.TEST_BROWSER==='firefox'?await firefox.launch():await chromium.launch({executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',args:['--no-sandbox']});
  try{
   await check(browser,'http://127.0.0.1:3000',1280);
   await check(browser,'http://127.0.0.1:8765/game/',390);
+  await verifyDialogue(browser,'http://127.0.0.1:3000/',1280);
+  await verifyDialogue(browser,'http://127.0.0.1:8765/game/',390);
  }finally{await browser.close()}
 })().catch(e=>{console.error(e);process.exitCode=1});

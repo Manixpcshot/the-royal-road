@@ -14,5 +14,5 @@ for target in ['cpanel','vps']:
         if target=='cpanel':
             archive.writestr('.htaccess','DirectoryIndex index.html\nAddType text/javascript .mjs\n')
         else:
-            for name in ['server.mjs','package.json','royal-road.service','README.md','test/rules.test.mjs','scripts/package.py']:
+            for name in ['server.mjs','package.json','royal-road.service','README.md','test/rules.test.mjs','test/narration.test.mjs','scripts/package.py']:
                 archive.write(root/name,name)

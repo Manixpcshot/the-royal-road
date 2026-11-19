@@ -78,3 +78,20 @@ test('commission and story input validation; every performance has bilingual cop
  const clips=storyClips();assert.equal(clips.length,21);assert.equal(new Set(clips.map(c=>c.id)).size,21);
  for(const clip of clips)assert.ok(clip.text.every(Boolean));
 });
+
+import {dispatch,deadlineText,lines} from '../public/rules.mjs';
+test('legacy expired saves get the deadline line; losing Susa on the last turn reports its capture',()=>{
+ const expired={...fresh(),turn:15,result:'loss',last:'loss'};assert.ok(valid(expired));assert.deepEqual(dispatch(expired),{id:'deadline',text:deadlineText});
+ expired.owners[11]=2;assert.deepEqual(dispatch(expired),{id:'loss',text:lines.loss});
+ assert.ok(!valid({...fresh(),last:['start']}));
+});
+test('all six contract responses survive reload and pay exactly once',()=>{
+ for(let id=0;id<3;id++)for(let choice=0;choice<2;choice++){
+  let s=fresh();s.owners.fill(1);s.owners[0]=0;assert.ok(commission(s,id));assert.ok(decide(s,choice));
+  s=JSON.parse(JSON.stringify(s));assert.ok(valid(s));assert.equal(s.freight.choice,choice);
+  let roadIncome=0;const before=s.gold;
+  for(let n=0;n<10&&s.freight;n++){roadIncome+=income(s);advance(s)}
+  assert.deepEqual(s.deliveries,[id]);assert.equal(s.gold-before-roadIncome,[choice===0?3:5,8,11][id]);
+  assert.equal(commission(s,id),false);assert.ok(valid(s));
+ }
+});

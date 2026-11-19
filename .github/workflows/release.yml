@@ -22,20 +22,23 @@ jobs:
           pip install --only-binary=:all: espeakng-loader==0.2.4 imageio-ffmpeg==0.6.0
           node scripts/record-scenes.mjs
       - run: python3 scripts/package.py
-      - name: Test extracted hosting builds in Chrome
+      - name: Test packaged dialogue and gameplay in Chrome and Firefox
         run: |
           npm install --prefix "$RUNNER_TEMP/browser-tools" --no-audit --no-fund playwright-core@1.56.1
+          "$RUNNER_TEMP/browser-tools/node_modules/.bin/playwright-core" install firefox
           mkdir -p "$RUNNER_TEMP/static/game" "$RUNNER_TEMP/vps"
           unzip -q dist/*cpanel*.zip -d "$RUNNER_TEMP/static/game"
           unzip -q dist/*vps*.zip -d "$RUNNER_TEMP/vps"
           node "$RUNNER_TEMP/vps/server.mjs" &
           python3 -m http.server 8765 --bind 127.0.0.1 --directory "$RUNNER_TEMP/static" &
-          NODE_PATH="$RUNNER_TEMP/browser-tools/node_modules" node scripts/browser-smoke.cjs
+          export NODE_PATH="$RUNNER_TEMP/browser-tools/node_modules"
+          node scripts/browser-smoke.cjs
+          TEST_BROWSER=firefox node scripts/browser-smoke.cjs
       - name: Publish versioned deployment archives
         run: |
           version="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$version" = "$GITHUB_REF_NAME"; fi
           if gh release view "$version" >/dev/null 2>&1; then exit 0; fi
-          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "The Caravanserai: three playable freight contracts, four voiced characters, twelve illustrated city stops and bilingual performances. Separate cPanel and Node.js VPS builds."
+          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Dialogue playback, end-of-campaign narration, contract text and save path fixes. Both hosting archives tested in Chrome and Firefox."
         env:
           GH_TOKEN: ${{ github.token }}

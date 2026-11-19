@@ -1,1 +1,1 @@
-{"name":"the-royal-road","version":"1.2.0","private":true,"type":"module","engines":{"node":">=20"},"scripts":{"start":"node server.mjs","test":"node --test test/*.test.mjs","package":"python3 scripts/package.py"}}
+{"name":"the-royal-road","version":"1.2.1","private":true,"type":"module","engines":{"node":">=20"},"scripts":{"start":"node server.mjs","test":"node --test test/*.test.mjs","package":"python3 scripts/package.py"}}

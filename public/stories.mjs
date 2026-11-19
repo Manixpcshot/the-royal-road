@@ -20,7 +20,7 @@ export const contracts=[
  {to:4,title:['رنگ نیلی تارسوس','Indigo for Tarsus'],fee:11,speaker:'rota',
   opening:['آب تا خط سیاه بدنهٔ کلک بالا آمده. آن رنگ نیلی اگر خیس شود، دیگر هیچ‌کس پولش را نمی‌دهد. جا روی کلک بخریم یا صبر کنیم؟','The water is up to the black mark on the raft. If the indigo gets wet, no one will pay for it. Buy a place aboard or wait?'],
   options:[['کرایهٔ کلک را بده','Pay for the raft'],['یک نوبت صبر کن','Wait one turn']],
-  effects:[['۲ سکه اکنون؛ حرکت در پایان همین نوبت','Pay 2 now; travel this turn if connected'],['رایگان؛ یک نوبت توقف','Free; camp for one turn']],
+  effects:[['۲ سکه اکنون؛ اگر راه باز باشد، حرکت در پایان همین نوبت','Pay 2 now; travel this turn if connected'],['رایگان؛ یک نوبت توقف','Free; camp for one turn']],
   replies:[['بارها را وسط بگذار. این دفعه رنگ آستینم از کار است، نه از آب رودخانه.','Load the middle first. This time the blue on my sleeve comes from work, not river water.'],['طناب‌ها را شل نکن. صبح اگر آب پایین رفت، از همین‌جا راه می‌افتیم.','Keep the ropes tight. If the water drops by morning, we leave from here.']],answer:['rota','dara']}
 ];
 export const streets=[

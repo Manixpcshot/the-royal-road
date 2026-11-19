@@ -20,6 +20,12 @@ export const lines={
  loss:['مهر رقیب بر دروازه نشست. این لشکرکشی به پایان رسید.','The rival seal is on the gate. Our campaign ends here.'],
  win:['از شوش تا سارد، پیک‌ها زیر یک پرچم می‌تازند.','From Susa to Sardis the couriers ride under one banner.']
 };
+export const deadlineText=['مهلت چهارده نوبت تمام شد. پیک به‌موقع به سارد نرسید.','Fourteen turns have passed. The courier did not reach Sardis in time.'];
+export function dispatch(s){
+ if(s.result==='loss'&&s.owners[11]===1)return {id:'deadline',text:deadlineText};
+ const id=s.result||s.last;
+ return {id,text:lines[id]};
+}
 export const modes=["scout","classic","siege"];
 export const fresh=(mode="classic")=>({mode,history:[],v:1,turn:1,ap:2,gold:mode==="scout"?12:mode==="siege"?5:8,owners:[2,0,2,0,0,0,0,0,0,0,1,1],walls:Array(12).fill(1),last:'start',result:''});
 export function linked(s) {
@@ -138,5 +144,5 @@ export function valid(s){
  const bounded=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
  return s?.v===1&&bounded(s.turn,1,15)&&bounded(s.ap,0,2)&&bounded(s.gold,0,1000)&&
  [s.owners,s.walls].every(a=>Array.isArray(a)&&a.length===12)&&s.owners.every(x=>bounded(x,0,2))&&s.walls.every(x=>bounded(x,1,3))&&
- (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=56&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,11)&&['capture','siege','toll','guard','join','commission','lost','travel','delivery'].includes(e.event)))&&validFreight(s)&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
+ (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=56&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,11)&&['capture','siege','toll','guard','join','commission','lost','travel','delivery'].includes(e.event)))&&validFreight(s)&&typeof s.last==='string'&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
 }

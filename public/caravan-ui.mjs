@@ -28,7 +28,9 @@ export function renderCaravan(s,selected,commit,play){
  if(!f){
   for(const [id,c] of contracts.entries()){
    const done=delivered.includes(id),card=document.createElement('section');
-   card.append(bilingual(c.title),bilingual([cities[c.to][1]+' · دستمزد '+c.fee+' سکه',cities[c.to][0]+' · Fee '+c.fee+' gold']));
+   card.append(bilingual(c.title));
+   const fee=id===0?'3–5':String(c.fee);
+   card.append(bilingual(done?[cities[c.to][1],cities[c.to][0]]:[cities[c.to][1]+' · دستمزد '+fee+' سکه',cities[c.to][0]+' · Fee '+fee+' gold']));
    const b=button(done?['تحویل شد','Delivered']:['قبول بار · ۱ فرمان','Accept · 1 order'],()=>commit(()=>commission(s,id)),'load-'+id);
    b.disabled=!!s.result||!s.ap||done;card.append(b);if(done)card.append(bilingual(receipts[id]));body.append(card);
   }
@@ -40,16 +42,18 @@ export function renderCaravan(s,selected,commit,play){
  const words=pending?c.opening:c.replies[f.choice];
  row.append(bilingual(words),button(['شنیدن دیالوگ','Hear dialogue'],()=>play(pending?'scene-'+f.id:'reply-'+f.id+'-'+f.choice,words),'hearStory'));
  const actions=document.createElement('div');actions.className='choices';
- if(pending){
+ if(s.result){actions.append(bilingual(['لشکرکشی پایان یافت؛ این بار تحویل نشد.','Campaign ended with this cargo undelivered.']))}
+ else if(pending){
   for(const [j,option] of c.options.entries()){
    const b=button(option,()=>{if(commit(()=>decide(s,j)))play('reply-'+f.id+'-'+j,c.replies[j])},'choice-'+j);
-   b.append(bilingual(c.effects[j]));b.disabled=!!s.result||(f.id!==0&&j===0&&s.gold<2);actions.append(b);
+   const capped=f.id===0&&j===0&&s.walls[11]===3;
+   b.append(bilingual(capped?['دژ شوش در بالاترین سطح است؛ پاداش تحویل ۳ سکه','Susa fort already at maximum; delivery pays 3']:c.effects[j]));b.disabled=!!s.result||(f.id!==0&&j===0&&s.gold<2);actions.append(b);
   }
  }else{
   const path=freightRoute(s,f.city,c.to);
   const pace=f.id===1&&f.choice===0?2:1;
   const eta=f.delay+Math.ceil((path.length-1)/pace);
-  const status=s.result?['لشکرکشی پایان یافت؛ این بار تحویل نشد.','Campaign ended with this cargo undelivered.']:path.length?['با وضعیت فعلی راه، '+eta+' نوبت تا تحویل','At current road conditions, '+eta+' turn(s) to delivery']:['راه بسته است؛ شهرهای مسیر را با پیمان به هم وصل کن.','Road closed. Secure a connected chain of friendly cities.'];
+  const status=path.length?['با وضعیت فعلی راه، '+eta+' نوبت تا تحویل','At current road conditions, '+eta+' turn(s) to delivery']:['راه بسته است؛ شهرهای مسیر را با پیمان به هم وصل کن.','Road closed. Secure a connected chain of friendly cities.'];
   actions.append(bilingual(status));
  }
  row.append(actions);

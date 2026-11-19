@@ -43,7 +43,11 @@ for clip in json.load(sys.stdin):
         lib.espeak_Synchronize()
         if len(pcm) < rate:
             raise RuntimeError("Empty performance: " + clip["id"])
-        path = out / (lang + "-" + clip["id"] + ".mp3")
+        if clip.get("dispatch"):
+            prefix = "fa-" if lang == "fa" else ""
+            path = out.parent / (prefix + clip["id"] + ".mp3")
+        else:
+            path = out / (lang + "-" + clip["id"] + ".mp3")
         subprocess.run([ffmpeg, "-v","error","-y","-f","s16le","-ar",str(rate),
                         "-ac","1","-i","pipe:0","-af","loudnorm=I=-17:LRA=8:TP=-2",
                         "-ar","24000","-b:a","48k",str(path)], input=pcm, check=True)
