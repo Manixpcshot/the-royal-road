@@ -16,6 +16,12 @@ async function verifyDialogue(browser, url, width){
    return original.call(this);
   };
  });
+ async function verifyStopped(){
+  // Some engines report ended media separately from a manually paused element.
+  const stillPlaying=await page.evaluate(()=>window.clips.filter(c=>!c.ended&&!c.paused)
+   .map(c=>[new URL(c.src).pathname,c.currentTime,c.duration,c.readyState]));
+  assert.deepEqual(stillPlaying,[],await page.locator('#city').innerText()+' '+JSON.stringify(stillPlaying));
+ }
  async function heard(suffix){
   await page.waitForFunction(end=>window.heard.at(-1)?.endsWith(end),suffix,{timeout:10000});
  }
@@ -51,9 +57,9 @@ async function verifyDialogue(browser, url, width){
   await page.locator('#hearCity').click();await heard('fa-street-'+city+'.mp3');
  }
  await pins.nth(0).click();
- assert.ok(await page.evaluate(()=>window.clips.every(c=>c.paused)));
+ await verifyStopped();
  await page.locator('#lang').selectOption('en');
- assert.ok(await page.evaluate(()=>window.clips.every(c=>c.paused)));
+ await verifyStopped();
 
  for(const [id,contract] of contracts.entries()){
   for(const choice of [0,1]){
@@ -76,7 +82,7 @@ async function verifyDialogue(browser, url, width){
    const count=await page.evaluate(()=>window.clips.length);
    await page.locator('#hearStory').click();await page.locator('#lang').selectOption('en');
    assert.equal(await page.evaluate(()=>window.clips.length),count);
-   assert.ok(await page.evaluate(()=>window.clips.every(c=>c.paused)));
+   await verifyStopped();
   }
  }
  // Old index.html saves, no remaining orders, max fort, and both defeat causes.
