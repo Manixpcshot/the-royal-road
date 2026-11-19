@@ -13,7 +13,9 @@ async function verifyDialogue(browser, url, width){
   HTMLMediaElement.prototype.play=function(){
    window.clips.push(this);
    this.addEventListener('playing',()=>window.heard.push(new URL(this.src).pathname),{once:true});
-   return original.call(this);
+   const result=original.call(this);
+   result.catch(err=>{window.playError=err.name+': '+err.message});
+   return result;
   };
  });
  async function verifyStopped(){
@@ -23,7 +25,16 @@ async function verifyDialogue(browser, url, width){
   assert.deepEqual(stillPlaying,[],await page.locator('#city').innerText()+' '+JSON.stringify(stillPlaying));
  }
  async function heard(suffix){
-  await page.waitForFunction(end=>window.heard.at(-1)?.endsWith(end),suffix,{timeout:10000});
+  try{await page.waitForFunction(end=>window.heard.at(-1)?.endsWith(end),suffix,{timeout:10000})}
+  catch(error){
+   const state=await page.evaluate(()=>{
+    const a=window.clips.at(-1);
+    return {heard:window.heard.slice(-5),src:a?.src,playing:!a?.paused,ended:a?.ended,time:a?.currentTime,
+     mediaError:a?.error?.message,playError:window.playError,status:document.querySelector('#audioStatus').textContent,
+     lang:document.querySelector('#lang').value,story:document.querySelector('.conversation')?.innerText.slice(0,160)};
+   });
+   throw new Error('Expected '+suffix+'; browser state '+JSON.stringify(state)+'; errors '+JSON.stringify(issues),{cause:error});
+  }
  }
  const home=new URL('./',url).href,alias=new URL('index.html',home).href;
  await page.goto(home);await page.locator('#hearCity').waitFor();
