@@ -18,3 +18,7 @@ By default the service listens at http://127.0.0.1:3000. Point your domain's rev
 
 ## Development and release
 Run npm test for the game rule suite. Run python3 scripts/package.py to create deployment archives in dist/. Push a v1.0.0 tag to run the GitHub release workflow. It tests the game, rebuilds the two archives and attaches them to the release.
+
+## 1.1 · دیده‌بانی و تدارکات
+از «شروع دوباره» سطح دشواری را انتخاب کنید. مسیر پیشنهادی کمترین هزینهٔ پیمان‌ها را روی نقشهٔ فعلی نشان می‌دهد. دیدبان شهر هدف حرکت بعدی رقیب را مشخص می‌کند. لغو آخرین فرمان تا پایان نوبت یا بارگذاری مجدد در دسترس است. رویدادهای لشکرکشی همراه بازی ذخیره می‌شوند.
+Choose Scout, Classic or Siege from Restart. Route planning finds the least expensive chain of treaties at current prices. Lookout previews the rival's next target. Undo reverses one order before ending the turn or reloading. The chronicle survives reloads. Existing version 1 saves continue with classic rules.

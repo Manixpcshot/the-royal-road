@@ -48,10 +48,21 @@ function terrain(c){
  for(let i=0;i<8;i++){const a=i*Math.PI/4,xx=967,yy=68;const point=(ang,r)=>[xx+Math.sin(ang)*r,yy-Math.cos(ang)*r];polygon(c,[point(a-.4,6),point(a,i%2?13:23),[xx,yy]],'#6d5c43');polygon(c,[[xx,yy],point(a,i%2?13:23),point(a+.4,6)],'#b49b73')}
  c.font='12px Georgia';c.fillText('N',967,37);
 }
-export function draw(canvas,s,selected){
+let background;
+export function draw(canvas,s,selected,path=[]){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
- canvas.width=1040*scale;canvas.height=570*scale;c.scale(scale,scale);terrain(c);
+ if(canvas.width!==1040*scale||canvas.height!==570*scale){canvas.width=1040*scale;canvas.height=570*scale}
+ c.setTransform(scale,0,0,scale,0,0);
+ if(!background||background.width!==canvas.width){
+  background=document.createElement('canvas');background.width=canvas.width;background.height=canvas.height;
+  const brush=background.getContext('2d');brush.scale(scale,scale);terrain(brush);
+ }
+ c.drawImage(background,0,0,1040,570);
  for(const [a,b] of roads){const A=cities[a],B=cities[b];c.beginPath();c.moveTo(A[2],A[3]);c.lineTo(B[2],B[3]);const held=s.owners[a]===1&&s.owners[b]===1;c.setLineDash(held?[]:[5,5]);c.lineWidth=held?4:2;c.strokeStyle=held?'#24756a':'#9b815e';c.stroke()}c.setLineDash([]);
+ if(path.length){
+  c.beginPath();path.forEach((i,k)=>{const [,,x,y]=cities[i];if(k)c.lineTo(x,y);else c.moveTo(x,y)});
+  c.strokeStyle='#60402a';c.lineWidth=6;c.stroke();c.strokeStyle='#ffd060';c.lineWidth=3;c.stroke();
+ }
  cities.forEach((city,i)=>{const [,,x,y,kind]=city,col=colors[s.owners[i]];c.beginPath();c.ellipse(x,y,24,10,0,0,Math.PI*2);c.fillStyle=i===selected?'#fff2bd':'#93764a55';c.fill();if(i===selected){c.strokeStyle='#237c71';c.lineWidth=2;c.stroke()}
  for(const [face,fill] of cityModel(kind,col,s.walls[i]))polygon(c,face.map(([a,b,z])=>[x+(a-b)*.98,y+(a+b)*.42-z]),fill,'#745e44');
  });
