@@ -1,7 +1,7 @@
 // A request owns both its recording and its optional device-voice fallback.
 // Late events from a paused recording must never start another utterance.
 export function createNarrator(env,initialLanguage,notify){
- let language=initialLanguage,current=null,media=null;
+ let language=initialLanguage,current=null,media=null,selectedLine=null;
  function releaseMedia(){
   if(!media)return;
   media.onended=null;media.onerror=null;
@@ -11,7 +11,7 @@ export function createNarrator(env,initialLanguage,notify){
  }
  function stop(){
   const previous=current;
-  current=null;
+  current=null;selectedLine=null;
   releaseMedia();
   if(previous?.utterance)env.speechSynthesis?.cancel();
   notify('');
@@ -19,6 +19,7 @@ export function createNarrator(env,initialLanguage,notify){
  function play(line){
   stop();
   if(language==='off')return;
+  selectedLine=line;
   const request={line};
   current=request;
   const complete=()=>{if(current===request)current=null};
@@ -47,12 +48,13 @@ export function createNarrator(env,initialLanguage,notify){
   media.play().catch(useDevice);
  }
  function setLanguage(next){
-  const line=current?.line;
+  if(next===language)return;
+  const line=selectedLine;
   stop();language=next;
   if(line&&next!=='off')play(line);
  }
  function leaveCity(){
-  if(current?.line.scope==='city')stop();
+  if(selectedLine?.scope==='city')stop();
  }
  return {play,stop,setLanguage,leaveCity};
 }

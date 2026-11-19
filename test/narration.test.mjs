@@ -23,13 +23,13 @@ function setup(){
  const line={scope:'city',text:['شوش','Susa'],file:l=>l+'-susa.mp3'};
  return {clips,utterances,notices,env,narrator,line};
 }
-test('switching language keeps the same active line; idle, muted and ended tracks stay silent',()=>{
+test('language switches replay the selected caption; unselected and muted tracks stay silent',()=>{
  const {clips,narrator,line}=setup();
  narrator.setLanguage('en');assert.equal(clips.length,0);
  narrator.play(line);narrator.setLanguage('fa');assert.deepEqual(clips.map(c=>c.url),['en-susa.mp3','fa-susa.mp3']);assert.equal(clips[0].media,clips[1].media);
  clips[0].media.ended=true;clips[0].onended();narrator.setLanguage('en');assert.equal(clips.length,3);
- clips[2].media.ended=true;clips[2].onended();narrator.setLanguage('fa');assert.equal(clips.length,3);
- narrator.play(line);narrator.setLanguage('off');narrator.play(line);assert.equal(clips.length,4);
+ clips[2].media.ended=true;clips[2].onended();narrator.setLanguage('fa');assert.equal(clips.length,4);
+ narrator.play(line);narrator.setLanguage('off');narrator.play(line);assert.equal(clips.length,5);
 });
 test('rejected starts and late errors cannot resurrect narration after leaving a city',async()=>{
  const {clips,narrator,utterances,line}=setup();narrator.play(line);narrator.leaveCity();
