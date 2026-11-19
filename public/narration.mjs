@@ -1,11 +1,18 @@
 // A request owns both its recording and its optional device-voice fallback.
 // Late events from a paused recording must never start another utterance.
 export function createNarrator(env,initialLanguage,notify){
- let language=initialLanguage,current=null;
+ let language=initialLanguage,current=null,media=null;
+ function releaseMedia(){
+  if(!media)return;
+  media.onended=null;media.onerror=null;
+  media.pause();
+  media.removeAttribute('src');
+  media.load();
+ }
  function stop(){
   const previous=current;
   current=null;
-  previous?.audio?.pause();
+  releaseMedia();
   if(previous?.utterance)env.speechSynthesis?.cancel();
   notify('');
  }
@@ -21,6 +28,7 @@ export function createNarrator(env,initialLanguage,notify){
   };
   function useDevice(){
    if(current!==request||request.utterance)return;
+   releaseMedia();
    const synth=env.speechSynthesis;
    const voice=synth?.getVoices().find(v=>v.lang.toLowerCase().split(/[-_]/)[0]===language);
    if(!voice||!env.SpeechSynthesisUtterance){fail();return}
@@ -31,9 +39,12 @@ export function createNarrator(env,initialLanguage,notify){
   }
   const path=line.file(language);
   if(!path){useDevice();return}
-  const clip=new env.Audio(path);request.audio=clip;
-  clip.onended=complete;clip.onerror=useDevice;
-  clip.play().catch(useDevice);
+  // Use a single transport so changing city or language cannot mix two voices.
+  media??=new env.Audio();
+  media.src=path;
+  media.onended=()=>{if(media.ended)complete()};
+  media.onerror=()=>{if(media.error)useDevice()};
+  media.play().catch(useDevice);
  }
  function setLanguage(next){
   const line=current?.line;
