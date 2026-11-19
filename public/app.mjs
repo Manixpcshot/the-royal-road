@@ -144,3 +144,43 @@ $('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i><
 window.addEventListener('pagehide',()=>narrator.stop());
 render();if(s.result)endScreen();
 showSelectedCity();
+
+const layout=document.querySelector('.layout'),panels=$('panels'),fold=$('fold');
+function setPanelOpen(open){
+ layout.classList.toggle('folded',!open);
+ fold.setAttribute('aria-expanded',String(open));
+ fold.setAttribute('aria-label',open?'بستن پنل / Collapse panel':'باز کردن پنل / Expand panel');
+}
+fold.onclick=()=>setPanelOpen(layout.classList.contains('folded'));
+document.querySelectorAll('[data-zone]').forEach(button=>{
+ button.onclick=()=>{
+  setPanelOpen(true);
+  const section=$(button.dataset.zone);
+  panels.scrollTop+=section.getBoundingClientRect().top-panels.getBoundingClientRect().top;
+ };
+});
+const screenButton=$('screen');
+function syncFullscreen(){
+ const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement||document.body.classList.contains('focus-view'));
+ screenButton.setAttribute('aria-pressed',String(active));
+ screenButton.innerHTML=active?'⛶ خروج <small>Exit fullscreen</small>':'⛶ تمام‌صفحه <small>Fullscreen</small>';
+}
+
+screenButton.onclick=async()=>{
+ if(document.body.classList.contains('focus-view')){document.body.classList.remove('focus-view');syncFullscreen();return}
+ try{
+  if(document.fullscreenElement||document.webkitFullscreenElement)
+   await (document.exitFullscreen||document.webkitExitFullscreen).call(document);
+  else{
+   const root=document.documentElement;
+   await (root.requestFullscreen||root.webkitRequestFullscreen).call(root);
+  }
+ }catch{document.body.classList.add('focus-view');syncFullscreen()}
+};
+document.addEventListener('fullscreenchange',syncFullscreen);
+document.addEventListener('webkitfullscreenchange',syncFullscreen);
+document.addEventListener('keydown',event=>{
+ if(event.key==='Escape'&&document.body.classList.contains('focus-view')&&!$('modal').open){
+  document.body.classList.remove('focus-view');syncFullscreen();
+ }
+});

@@ -39,6 +39,6 @@ jobs:
           version="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$version" = "$GITHUB_REF_NAME"; fi
           if gh release view "$version" >/dev/null 2>&1; then exit 0; fi
-          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Fixed keyboard focus during caravan conversations and orders. Refresh restores the selected city, route overlay and same-turn undo. Existing campaign saves remain compatible."
+          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Full-window campaign map, compact collapsible command panel and native fullscreen controls."
         env:
           GH_TOKEN: ${{ github.token }}

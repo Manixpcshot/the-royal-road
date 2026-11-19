@@ -13,6 +13,15 @@ async function check(browser, url, width) {
   await pins.last().waitFor();
   assert.equal(await pins.count(),12);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1));
+  await page.locator('#fold').click();
+  assert.ok(await page.locator('#panels').isHidden());
+  await page.locator('[data-zone="sound"]').click();
+  assert.ok(await page.locator('#panels').isVisible());
+  await page.locator('#screen').click();
+  await page.waitForSelector('#screen[aria-pressed="true"]');
+  await page.locator('#screen').click();
+  await page.waitForSelector('#screen[aria-pressed="false"]');
   await page.locator('#voice').click();
   await page.locator('#lang').selectOption('off');
   await page.locator('#load-0').press('Enter');
