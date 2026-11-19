@@ -2,7 +2,7 @@ name: Release Royal Road
 on:
   push:
     branches: [main]
-    paths: ['package.json', '.github/workflows/release.yml', 'scripts/*check.cjs', 'scripts/browser-smoke.cjs']
+    paths: ['package.json', '.github/workflows/release.yml', 'scripts/*check.cjs', 'scripts/browser-smoke.cjs', 'public/**', 'test/**']
     tags: ['v*']
 permissions:
   contents: write
