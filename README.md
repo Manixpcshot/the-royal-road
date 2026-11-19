@@ -20,8 +20,8 @@ By default the service listens at http://127.0.0.1:3000. Point your domain's rev
 Run npm test for the game rule suite. Run python3 scripts/package.py to create deployment archives in dist/. Push a v1.0.0 tag to run the GitHub release workflow. It tests the game, rebuilds the two archives and attaches them to the release.
 
 ## 1.1 · دیده‌بانی و تدارکات
-از «شروع دوباره» سطح دشواری را انتخاب کنید. مسیر پیشنهادی کمترین هزینهٔ پیمان‌ها را روی نقشهٔ فعلی نشان می‌دهد. دیدبان شهر هدف حرکت بعدی رقیب را مشخص می‌کند. لغو آخرین فرمان تا پایان نوبت یا بارگذاری مجدد در دسترس است. رویدادهای لشکرکشی همراه بازی ذخیره می‌شوند.
-Choose Scout, Classic or Siege from Restart. Route planning finds the least expensive chain of treaties at current prices. Lookout previews the rival's next target. Undo reverses one order before ending the turn or reloading. The chronicle survives reloads. Existing version 1 saves continue with classic rules.
+از «شروع دوباره» سطح دشواری را انتخاب کنید. مسیر پیشنهادی کمترین هزینهٔ پیمان‌ها را روی نقشهٔ فعلی نشان می‌دهد. دیدبان شهر هدف حرکت بعدی رقیب را مشخص می‌کند. لغو آخرین فرمان تا پایان همان نوبت، حتی پس از بازخوانی صفحه، در دسترس است. شهر انتخاب‌شده و وضعیت مسیر پیشنهادی هم حفظ می‌شوند. رویدادهای لشکرکشی همراه بازی ذخیره می‌شوند.
+Choose Scout, Classic or Siege from Restart. Route planning finds the least expensive chain of treaties at current prices. Lookout previews the rival's next target. Undo reverses one order until the turn ends, even after a reload. The selected city and route overlay are restored when you return. The chronicle survives reloads. Existing version 1 saves continue with classic rules.
 
 ## 1.2 · کاروان‌سرا / The Caravanserai
 بارگیری هر قرارداد یک فرمان می‌خواهد. با صاحب بار صحبت کنید، راه مقصد را به قلمرو خود وصل کنید و نشان گاری را روی نقشه دنبال کنید. در پایان نوبت، پس از حرکت رقیب، کاروان از نزدیک‌ترین مسیر خودی می‌رود. سفری که راهش بسته است منتظر می‌ماند. اگر محل توقف کاروان تصرف شود، می‌توانید قرارداد را از شوش دوباره بگیرید.

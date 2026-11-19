@@ -15,15 +15,23 @@ async function check(browser, url, width) {
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.locator('#voice').click();
   await page.locator('#lang').selectOption('off');
-  await page.locator('#load-0').click();
+  await page.locator('#load-0').press('Enter');
+  assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
   await page.locator('#lang').selectOption('en');
   await page.locator('#hearStory').click();
-  await page.locator('#choice-0').click();
+  await page.locator('#choice-0').press('Enter');
+  assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
   await page.reload();
   assert.match(await page.locator('#freightBody').innerText(),/Opis/);
+  await page.locator('#undo').click();
+  assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
+  assert.ok(await page.locator('#choice-0').isVisible());
+  await page.locator('#choice-0').click();
   await page.locator('#next').click();
   assert.match(await page.locator('#ledger').innerText(),/1 \/ 3/);
   assert.match(await page.locator('#freightReport').innerText(),/Delivered/);
+  await page.reload();
+  assert.ok(await page.locator('#undo').isDisabled());
   for(const lang of ['en','fa']){
     const response=await page.request.get(new URL('./audio/story/'+lang+'-street-11.mp3',page.url()).href);
     assert.equal(response.status(),200);assert.ok((await response.body()).length>2000);
@@ -38,13 +46,29 @@ async function check(browser, url, width) {
   assert.match(await page.locator('#detail').innerText(),/Free/);
   await page.locator('#orders button').click();
   await page.reload();
-  await pins.nth(7).click();
+  assert.equal(await pins.nth(7).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#plan').getAttribute('aria-pressed'),'true');
   assert.match(await page.locator('#detail').innerText(),/Persia/);
+  assert.ok(await pins.nth(7).evaluate(pin=>{
+    const rect=pin.getBoundingClientRect(),map=pin.closest('.scroll').getBoundingClientRect();
+    return rect.left>=map.left&&rect.right<=map.right;
+  }));
+  await page.locator('#undo').click();
+  assert.match(await page.locator('#detail').innerText(),/Free/);
+  assert.match(await page.locator('#stats').innerText(),/2\/2/);
+  await page.reload();
+  assert.ok(await page.locator('#undo').isDisabled());
+  await page.locator('#orders button').press('Enter');
+  assert.equal(await page.locator(':focus').getAttribute('id'),'order-toll');
   await page.locator('summary').click();
   assert.match(await page.locator('#history').innerText(),/Nisibis/);
   await page.locator('#restart').click();
   await page.locator('#difficulty').selectOption('scout');
   await page.locator('#confirm').click();
+  await page.reload();
+  assert.equal(await pins.nth(11).getAttribute('aria-pressed'),'true');
+  assert.equal(await page.locator('#plan').getAttribute('aria-pressed'),'false');
+  assert.ok(await page.locator('#undo').isDisabled());
   for(const [i,city] of [7,6,3,1,0].entries()){
     if(i&&i%2===0)await page.locator('#next').click();
     await pins.nth(city).click();

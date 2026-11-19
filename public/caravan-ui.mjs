@@ -31,7 +31,9 @@ export function renderCaravan(s,selected,commit,play){
    card.append(bilingual(c.title));
    const fee=id===0?'3–5':String(c.fee);
    card.append(bilingual(done?[cities[c.to][1],cities[c.to][0]]:[cities[c.to][1]+' · دستمزد '+fee+' سکه',cities[c.to][0]+' · Fee '+fee+' gold']));
-   const b=button(done?['تحویل شد','Delivered']:['قبول بار · ۱ فرمان','Accept · 1 order'],()=>commit(()=>commission(s,id)),'load-'+id);
+   const b=button(done?['تحویل شد','Delivered']:['قبول بار · ۱ فرمان','Accept · 1 order'],()=>{
+    if(commit(()=>commission(s,id)))el('hearStory').focus({preventScroll:true});
+   },'load-'+id);
    b.disabled=!!s.result||!s.ap||done;card.append(b);if(done)card.append(bilingual(receipts[id]));body.append(card);
   }
   return;
@@ -45,7 +47,10 @@ export function renderCaravan(s,selected,commit,play){
  if(s.result){actions.append(bilingual(['لشکرکشی پایان یافت؛ این بار تحویل نشد.','Campaign ended with this cargo undelivered.']))}
  else if(pending){
   for(const [j,option] of c.options.entries()){
-   const b=button(option,()=>{if(commit(()=>decide(s,j)))play('reply-'+f.id+'-'+j,c.replies[j])},'choice-'+j);
+   const b=button(option,()=>{
+    if(!commit(()=>decide(s,j)))return;
+    el('hearStory').focus({preventScroll:true});play('reply-'+f.id+'-'+j,c.replies[j]);
+   },'choice-'+j);
    const capped=f.id===0&&j===0&&s.walls[11]===3;
    b.append(bilingual(capped?['دژ شوش در بالاترین سطح است؛ پاداش تحویل ۳ سکه','Susa fort already at maximum; delivery pays 3']:c.effects[j]));b.disabled=!!s.result||(f.id!==0&&j===0&&s.gold<2);actions.append(b);
   }
