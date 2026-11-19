@@ -17,8 +17,9 @@ jobs:
       - run: npm test
       - name: Render Persian and English performances
         run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq espeak-ng ffmpeg
+          python3 -m venv "$RUNNER_TEMP/speech"
+          source "$RUNNER_TEMP/speech/bin/activate"
+          pip install --only-binary=:all: espeakng-loader==0.2.4 imageio-ffmpeg==0.6.0
           node scripts/record-scenes.mjs
       - run: python3 scripts/package.py
       - name: Test extracted hosting builds in Chrome
