@@ -1,3 +1,4 @@
+import {contracts} from './stories.mjs';
 // Coordinates belong to the campaign board, a stylised map.
 export const cities = [
  ['Sardis','سارد',133,185,'palace'],['Gordium','گوردیون',305,110,'tower'],
@@ -58,6 +59,53 @@ export function forecast(s){
 function record(s,event,city){
  (s.history??=[]).push({turn:s.turn,event,city});
 }
+
+export function freightRoute(s,from,to){
+ if(s.owners[from]!==1||s.owners[to]!==1)return [];
+ const queue=[[from]],seen=new Set([from]);
+ for(const path of queue){
+  const end=path.at(-1);
+  if(end===to)return path;
+  for(const next of nearby(end)){
+   if(s.owners[next]===1&&!seen.has(next)){seen.add(next);queue.push([...path,next])}
+  }
+ }
+ return [];
+}
+export function commission(s,id){
+ if(s.result||!s.ap||s.freight||!Number.isInteger(id)||!contracts[id]||s.deliveries?.includes(id))return false;
+ s.freight={id,city:11,choice:null,delay:0};s.ap--;record(s,'commission',11);return true;
+}
+export function decide(s,choice){
+ const f=s.freight;
+ if(s.result||!f||f.choice!==null||![0,1].includes(choice))return false;
+ const payment=f.id!==0&&choice===0?2:0;
+ if(s.gold<payment)return false;
+ s.gold-=payment;f.choice=choice;
+ if(f.id===0&&choice===0)s.walls[11]=Math.min(3,s.walls[11]+1);
+ if(f.id===2&&choice===1)f.delay=1;
+ return true;
+}
+function haul(s){
+ const f=s.freight;
+ if(!f)return;
+ if(s.owners[f.city]!==1){record(s,'lost',f.city);delete s.freight;return}
+ if(f.choice===null)return;
+ if(f.delay){f.delay--;return}
+ const contract=contracts[f.id],path=freightRoute(s,f.city,contract.to);
+ if(!path.length)return;
+ const speed=f.id===1&&f.choice===0?2:1;
+ f.city=path[Math.min(speed,path.length-1)];
+ if(f.city!==contract.to){record(s,'travel',f.city);return}
+ s.gold+=contract.fee-(f.id===0&&f.choice===0?2:0);
+ (s.deliveries??=[]).push(f.id);record(s,'delivery',f.city);delete s.freight;
+}
+function validFreight(s){
+ const ids=s.deliveries??[],f=s.freight;
+ if(!Array.isArray(ids)||ids.length!==new Set(ids).size||!ids.every(i=>Number.isInteger(i)&&!!contracts[i]))return false;
+ return f===undefined||!!f&&Number.isInteger(f.id)&&!!contracts[f.id]&&!ids.includes(f.id)&&Number.isInteger(f.city)&&f.city>=0&&f.city<12&&[null,0,1].includes(f.choice)&&[0,1].includes(f.delay);
+}
+
 export function advance(s){
  if(s.result)return;
  const target=forecast(s);s.last='rest';
@@ -65,6 +113,7 @@ export function advance(s){
   if(s.owners[target]===1&&s.walls[target]>1){record(s,'siege',target);s.walls[target]--;}
   else {record(s,'capture',target);if(s.owners[target]===1)s.last='raid';s.owners[target]=2;s.walls[target]=1}
  }
+ haul(s);
  s.gold+=income(s);s.ap=2;s.turn++;finish(s);
 }
 export const income=s=>2+Number(s.mode==='scout')+Math.floor(linked(s).size/3);
@@ -89,5 +138,5 @@ export function valid(s){
  const bounded=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
  return s?.v===1&&bounded(s.turn,1,15)&&bounded(s.ap,0,2)&&bounded(s.gold,0,1000)&&
  [s.owners,s.walls].every(a=>Array.isArray(a)&&a.length===12)&&s.owners.every(x=>bounded(x,0,2))&&s.walls.every(x=>bounded(x,1,3))&&
- (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=42&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,11)&&['capture','siege','toll','guard','join'].includes(e.event)))&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
+ (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=56&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,11)&&['capture','siege','toll','guard','join','commission','lost','travel','delivery'].includes(e.event)))&&validFreight(s)&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
 }

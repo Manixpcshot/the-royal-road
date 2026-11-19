@@ -52,3 +52,29 @@ test('450 reproducible campaigns terminate with valid state at every step',()=>{
  }
  assert.ok(income(fresh('scout'))>income(fresh()));
 });
+
+import {commission,decide,freightRoute} from '../public/rules.mjs';
+import {storyClips} from '../public/stories.mjs';
+test('mill contract raises one fort level and pays the smaller fee just once',()=>{
+ const s=fresh();assert.ok(commission(s,0));assert.equal(s.ap,1);
+ assert.equal(commission(s,1),false);assert.ok(decide(s,0));assert.equal(s.walls[11],2);assert.equal(decide(s,1),false);
+ advance(s);assert.deepEqual(s.deliveries,[0]);assert.equal(s.gold,8+income(s)+3);
+ assert.equal(commission(s,0),false);assert.ok(valid(JSON.parse(JSON.stringify(s))));
+});
+test('a closed route holds cargo until the owner opens a road; mounted courier crosses two legs',()=>{
+ const s=fresh();commission(s,1);decide(s,0);assert.equal(s.gold,6);advance(s);
+ assert.equal(s.freight.city,11);assert.ok(order(s,7,'join'));assert.deepEqual(freightRoute(s,11,7),[11,10,7]);
+ advance(s);assert.deepEqual(s.deliveries,[1]);assert.ok(valid(s));
+});
+test('cash shortage leaves the choice open, a free ferry waits, captured freight is lost',()=>{
+ const s=fresh();commission(s,2);s.gold=1;assert.ok(!decide(s,0));assert.equal(s.freight.choice,null);decide(s,1);
+ advance(s);assert.equal(s.freight.delay,0);assert.equal(s.freight.city,11);
+ s.freight.city=1;s.owners[1]=2;advance(s);assert.equal(s.freight,undefined);
+ assert.ok(s.history.some(e=>e.event==='lost'));assert.deepEqual(s.deliveries??[],[]);
+});
+test('commission and story input validation; every performance has bilingual copy',()=>{
+ const s=fresh();s.ap=0;assert.equal(commission(s,1),false);s.result='loss';s.ap=2;assert.equal(commission(s,0),false);
+ assert.ok(!valid({...fresh(),freight:{}}));assert.ok(!valid({...fresh(),deliveries:[0,0]}));
+ const clips=storyClips();assert.equal(clips.length,21);assert.equal(new Set(clips.map(c=>c.id)).size,21);
+ for(const clip of clips)assert.ok(clip.text.every(Boolean));
+});

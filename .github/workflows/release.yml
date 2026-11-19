@@ -15,6 +15,11 @@ jobs:
         with:
           node-version: 22
       - run: npm test
+      - name: Render Persian and English performances
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq espeak-ng ffmpeg
+          node scripts/record-scenes.mjs
       - run: python3 scripts/package.py
       - name: Test extracted hosting builds in Chrome
         run: |
@@ -30,6 +35,6 @@ jobs:
           version="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$version" = "$GITHUB_REF_NAME"; fi
           if gh release view "$version" >/dev/null 2>&1; then exit 0; fi
-          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Scout, Classic and Siege campaigns; live route planning, rival forecasts, campaign chronicle and command undo. Separate cPanel and Node.js VPS builds."
+          gh release create "$version" dist/*.zip --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "The Caravanserai: three playable freight contracts, four voiced characters, twelve illustrated city stops and bilingual performances. Separate cPanel and Node.js VPS builds."
         env:
           GH_TOKEN: ${{ github.token }}

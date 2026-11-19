@@ -22,3 +22,8 @@ Run npm test for the game rule suite. Run python3 scripts/package.py to create d
 ## 1.1 · دیده‌بانی و تدارکات
 از «شروع دوباره» سطح دشواری را انتخاب کنید. مسیر پیشنهادی کمترین هزینهٔ پیمان‌ها را روی نقشهٔ فعلی نشان می‌دهد. دیدبان شهر هدف حرکت بعدی رقیب را مشخص می‌کند. لغو آخرین فرمان تا پایان نوبت یا بارگذاری مجدد در دسترس است. رویدادهای لشکرکشی همراه بازی ذخیره می‌شوند.
 Choose Scout, Classic or Siege from Restart. Route planning finds the least expensive chain of treaties at current prices. Lookout previews the rival's next target. Undo reverses one order before ending the turn or reloading. The chronicle survives reloads. Existing version 1 saves continue with classic rules.
+
+## 1.2 · کاروان‌سرا / The Caravanserai
+بارگیری هر قرارداد یک فرمان می‌خواهد. با صاحب بار صحبت کنید، راه مقصد را به قلمرو خود وصل کنید و نشان گاری را روی نقشه دنبال کنید. در پایان نوبت، پس از حرکت رقیب، کاروان از نزدیک‌ترین مسیر خودی می‌رود. سفری که راهش بسته است منتظر می‌ماند. اگر محل توقف کاروان تصرف شود، می‌توانید قرارداد را از شوش دوباره بگیرید.
+Each city has an original illustrated streetscape and fictional local voice. Three optional contracts involve bread for the watch, a courier relay and a river crossing. The campaign deadline still applies. Existing saves can take contracts immediately.
+Both release ZIPs include synthetic English and Persian recordings for the new scenes. For a source checkout, install ffmpeg with libflite and espeak-ng, then run node scripts/record-scenes.mjs before packaging. Without rendering, source checkouts use available device voices for the new scenes.

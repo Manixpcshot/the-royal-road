@@ -66,4 +66,12 @@ export function draw(canvas,s,selected,path=[]){
  cities.forEach((city,i)=>{const [,,x,y,kind]=city,col=colors[s.owners[i]];c.beginPath();c.ellipse(x,y,24,10,0,0,Math.PI*2);c.fillStyle=i===selected?'#fff2bd':'#93764a55';c.fill();if(i===selected){c.strokeStyle='#237c71';c.lineWidth=2;c.stroke()}
  for(const [face,fill] of cityModel(kind,col,s.walls[i]))polygon(c,face.map(([a,b,z])=>[x+(a-b)*.98,y+(a+b)*.42-z]),fill,'#745e44');
  });
+ if(s.freight){
+  const [,,x,y]=cities[s.freight.city];
+  c.save();c.translate(x-34,y-5);
+  c.fillStyle='#70432c';c.fillRect(-8,-8,18,8);c.fillRect(9,-3,5,2);
+  polygon(c,[[-8,-8],[-5,-15],[4,-16],[9,-9]],'#f4cb80','#614932');
+  for(const dx of [-4,6]){c.beginPath();c.arc(dx,1,3,0,2*Math.PI);c.fillStyle='#423728';c.fill()}
+  c.restore();
+ }
 }

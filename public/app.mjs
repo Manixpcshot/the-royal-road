@@ -1,4 +1,7 @@
 import {cities,lines,fresh,legal,order,advance,linked,cost,valid,income,itinerary,forecast,nearby} from './rules.mjs';
+import {renderCaravan} from './caravan-ui.mjs';
+import {receipts} from './stories.mjs';
+import {recorded} from './performance.mjs';
 import {draw} from './atlas.mjs';
 const $=id=>document.getElementById(id), key='royal-road/1'+location.pathname;
 let planned=false,undoState=null;
@@ -7,7 +10,7 @@ try{const data=JSON.parse(localStorage.getItem(key));if(valid(data))s=data;voice
 const fa=n=>n.toLocaleString('fa-IR');
 const owners=['آزاد / Free','پارس / Persia','رقیب / Rival'];
 function save(){try{localStorage.setItem(key,JSON.stringify(s));storageOK=true}catch{storageOK=false}}
-function stop(){audio?.pause();window.speechSynthesis?.cancel()}
+function stop(){audio?.pause();audio=null;window.speechSynthesis?.cancel()}
 function speak(){
  stop();if(voice==='off')return;
  if(voice==='fa'){
@@ -17,9 +20,29 @@ function speak(){
  }
  audio=new Audio('./audio/'+(voice==='fa'?'fa-':'')+s.last+'.mp3');audio.play().catch(()=>{});
 }
-const events={join:'پیمان / Treaty',guard:'تقویت / Fortified',toll:'عوارض / Toll',siege:'آسیب دژ / Fort damaged',capture:'تصرف رقیب / Rival claimed'};
+const events={commission:'بارگیری / Commissioned',travel:'عبور کاروان / In transit',lost:'بار از دست رفت / Cargo lost',delivery:'تحویل بار / Delivered',join:'پیمان / Treaty',guard:'تقویت / Fortified',toll:'عوارض / Toll',siege:'آسیب دژ / Fort damaged',capture:'تصرف رقیب / Rival claimed'};
 const cityName=i=>cities[i][1]+' / '+cities[i][0];
+function trade(action){
+ const prior=JSON.stringify(s);
+ if(!action())return false;
+ undoState=prior;stop();save();render();return true;
+}
+function playStory(id,words){
+ stop();if(voice==='off')return;
+ const language=voice;
+ function deviceVoice(){
+  const synth=window.speechSynthesis;
+  const v=synth?.getVoices().find(v=>v.lang.startsWith(language));
+  if(v){const u=new SpeechSynthesisUtterance(words[language==='fa'?0:1]);u.voice=v;synth.speak(u)}
+ }
+ if(!recorded){deviceVoice();return}
+ const clip=new Audio('./audio/story/'+language+'-'+id+'.mp3');
+ audio=clip;clip.play().catch(()=>{if(audio===clip&&voice===language)deviceVoice()});
+}
 function render(){
+ renderCaravan(s,selected,trade,playStory);
+ const shipment=(s.history||[]).findLast(e=>['delivery','lost','travel'].includes(e.event));
+ $('freightReport').textContent=shipment?'نوبت / Turn '+shipment.turn+' · '+events[shipment.event]+' · '+cityName(shipment.city):'';
  const route=itinerary(s);
  draw($('atlas'),s,selected,planned?route.path:[]);
  $('plan').setAttribute('aria-pressed',planned);
@@ -60,13 +83,16 @@ function after(){save();render();speak();if(s.result)endScreen()}
 function modal(html){$('modalBody').innerHTML=html;if(!$('modal').open)$('modal').showModal()}
 function endScreen(){
  const outcome=s.result==='loss'&&s.owners[11]===1?'مهلت ۱۴ نوبت تمام شد. / The 14-turn deadline passed.':lines[s.result].join('<br>');
- modal('<h2>'+(s.result==='win'?'شاهراه متحد شد / Victory':'پایان لشکرکشی / Defeat')+'</h2><p>'+outcome+'</p>')}
+ const loads=s.deliveries||[];
+ const cargo=loads.length?loads.map(id=>'<p dir="rtl">'+receipts[id][0]+'</p><p lang="en">'+receipts[id][1]+'</p>').join(''):'';
+ const unfinished=s.freight?'<p>دفتر کاروان با یک محموله در راه بسته شد.<br>The ledger closed with a shipment still on the road.</p>':'';
+ modal('<h2>'+(s.result==='win'?'شاهراه متحد شد / Victory':'پایان لشکرکشی / Defeat')+'</h2><p>'+outcome+'</p>'+cargo+unfinished)}
 $('plan').onclick=()=>{planned=!planned;render()};
 $('undo').onclick=()=>{if(!undoState||s.result)return;stop();s=JSON.parse(undoState);undoState=null;save();render()};
 $('next').onclick=()=>{undoState=null;advance(s);after()};
 $('voice').onclick=speak;$('lang').value=voice;$('lang').onchange=e=>{voice=e.target.value;try{localStorage.setItem(key+'/voice',voice)}catch{}speak()};
 $('close').onclick=()=>$('modal').close();
 $('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</h2><p>ذخیرهٔ این لشکرکشی جایگزین می‌شود.<br>Your current campaign save will be replaced.</p><label>درجهٔ سختی / Difficulty <select id="difficulty"><option value="scout">دیده‌بان / Scout</option><option selected value="classic">کلاسیک / Classic</option><option value="siege">محاصره / Siege</option></select></label><button id="confirm">شروع / Start</button>');$('confirm').onclick=()=>{$('modal').close();s=fresh($('difficulty').value);undoState=null;planned=false;selected=11;after();scroller.scrollLeft=scroller.scrollWidth}};
-$('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به سارد وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to Sardis through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p>');
+$('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به سارد وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to Sardis through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p><p dir="rtl">هر قرارداد یک فرمان می‌خواهد. در کاروان‌سرا به صاحب بار پاسخ بده. در پایان هر نوبت، پس از حرکت رقیب، کاروان از راه شهرهای خودی پیش می‌رود. قطع راه کاروان را متوقف می‌کند؛ تصرف محل استقرارش بار را از بین می‌برد. هر قرارداد یک بار دستمزد می‌دهد.</p><p>Accepting freight uses one order. Answer the speaker to send the load. After each rival move, freight travels through friendly cities. A broken route stalls it. Capture of its current stop loses the cargo. Each contract pays once.</p>');
 render();if(s.result)endScreen();
 const scroller=document.querySelector('.scroll');scroller.scrollLeft=scroller.scrollWidth;

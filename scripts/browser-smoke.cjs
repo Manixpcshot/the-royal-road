@@ -14,6 +14,21 @@ async function check(browser, url, width) {
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   await page.locator('#voice').click();
   await page.locator('#lang').selectOption('off');
+  await page.locator('#load-0').click();
+  await page.locator('#lang').selectOption('en');
+  await page.locator('#hearStory').click();
+  await page.locator('#choice-0').click();
+  await page.reload();
+  assert.match(await page.locator('#freightBody').innerText(),/Opis/);
+  await page.locator('#next').click();
+  assert.match(await page.locator('#ledger').innerText(),/1 \/ 3/);
+  assert.match(await page.locator('#freightReport').innerText(),/Delivered/);
+  for(const lang of ['en','fa']){
+    const response=await page.request.get(new URL('./audio/story/'+lang+'-street-11.mp3',page.url()).href);
+    assert.equal(response.status(),200);assert.ok((await response.body()).length>2000);
+  }
+  await page.locator('#restart').click();await page.locator('#confirm').click();
+  await page.locator('#lang').selectOption('off');
   await page.locator('#plan').click();
   assert.match(await page.locator('#estimate').innerText(),/12/);
   await pins.nth(7).click();
