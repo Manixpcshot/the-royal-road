@@ -23,7 +23,17 @@ export function renderCaravan(s,selected,commit,play){
  el('council').style.setProperty('--landmark', 'url(./art/'+kind+'.webp)');
  paintStreet(el('streetArt'),selected,kind,s.turn,s.owners[selected],s.walls[selected],s.freight?.city===selected);
  el('streetName').textContent=cityName(selected);
- const detail=el('streetText');detail.replaceChildren(bilingual(streets[selected]));
+ const scene=el('cityScene'),street=el('streetArt');
+ const city=cities[selected][0].toLowerCase();
+ if(scene.dataset.city!==city){
+  scene.hidden=true;street.hidden=false;
+  scene.onload=()=>{scene.hidden=false;street.hidden=true};
+  scene.onerror=()=>{scene.hidden=true;street.hidden=false};
+  scene.dataset.city=city;scene.src='./art/city/'+city+'.webp';
+ }
+ const roleName=residents[selected],detail=el('streetText');
+ const portrait=illustration('portrait/'+roleName,'speaker-portrait');
+ detail.replaceChildren(portrait,bilingual(streets[selected]));
  let local;
  if(s.freight?.city===selected)local=['زنگوله‌های این کاروان را از میدان می‌شنوی.','Your caravan bells carry across the square.'];
  else if(forecast(s)===selected)local=['دیده‌بان چراغ برج را دو بار پوشاند؛ رقیب به سوی این شهر می‌آید.','The lookout covers the lamp twice. The rival is heading here.'];
@@ -47,7 +57,7 @@ export function renderCaravan(s,selected,commit,play){
   return;
  }
  const c=contracts[f.id],pending=f.choice===null,role=pending?c.speaker:c.answer[f.choice];
- const row=document.createElement('section');row.className='conversation';row.append(illustration(cargoArt[f.id],'conversation-art'),bilingual(c.title));
+ const row=document.createElement('section');row.className='conversation';row.append(illustration('portrait/'+role,'speaker-portrait'),bilingual(c.title));
  const speaker=document.createElement('small');speaker.textContent=voices[role].join(' / ');row.append(speaker);
  const words=pending?c.opening:c.replies[f.choice];
  row.append(bilingual(words),button(['شنیدن دیالوگ','Hear dialogue'],()=>play(pending?'scene-'+f.id:'reply-'+f.id+'-'+f.choice,words),'hearStory'));

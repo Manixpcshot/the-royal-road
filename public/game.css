@@ -99,3 +99,23 @@ body>header #stats{margin-inline-start:auto;display:flex}
 #panels #council{background:linear-gradient(100deg,#182f31 22%,#253b33e6),url('./art/terrain.webp') center/cover}
 .bar,.turn-controls{background:#1b2d30}.rail nav,body>header{background:#14272a}
 @media(max-width:760px){.pin{padding:2px 4px}}
+
+/* Illustrated pages of the campaign journal. */
+#panels .street [hidden]{display:none}
+#cityScene,.story-scene{display:block;width:100%;aspect-ratio:2.55;object-fit:cover;border-radius:5px}
+.story-scene{margin-bottom:14px}
+#streetText .speaker-portrait,.conversation .speaker-portrait{width:55px;height:65px;object-fit:cover;border-radius:5px;border:1px solid #aa926a;float:inline-start;margin:3px 10px 5px 0}
+#streetText button{clear:both}
+#panels .conversation{display:flow-root}
+body>header{background:linear-gradient(#102d2cd9,#112a29ed),url('./art/surface/cedar.webp') center/320px}
+.rail nav{background:linear-gradient(#102237c9,#172736e8),url('./art/surface/lapis.webp') center/280px}
+#panels #council{background:linear-gradient(115deg,#16332f9c,#162d29cf),url('./art/surface/leather.webp') center/320px}
+#panels{background:#eee1c9 url('./art/surface/papyrus.webp') center/340px}
+#panels .freight section{background:linear-gradient(#fff4dbbb,#fff5dcd9),url('./art/surface/linen.webp') center/280px}
+.turn-controls{background:linear-gradient(#132327bd,#14262bd9),url('./art/surface/basalt.webp') center/290px}
+.turn-controls #next{background:linear-gradient(#ffe3aabf,#fbd28bcf),url('./art/surface/bronze.webp') center/220px}
+#chronicle summary{background:linear-gradient(#fff0d7da,#fae8c9e8),url('./art/surface/clay.webp') center/240px}
+#panels .intel>div:first-child::before,#panels .intel>div:nth-child(2)::before,#panels .dispatch::before{content:'';display:block;width:100%;aspect-ratio:2.5;background-position:center;background-size:cover;border-radius:4px;margin-bottom:7px}
+#panels .intel>div:first-child::before{background-image:url('./art/scene/lookout.webp')}
+#panels .intel>div:nth-child(2)::before{background-image:url('./art/scene/income.webp')}
+#panels .dispatch::before{background-image:url('./art/scene/dispatch.webp')}

@@ -18,6 +18,21 @@ async function check(browser, url, width) {
     },asset);
     assert.ok(size>=100);
   }
+  const gallery={
+    city:'sardis gordium celaenae mazaca tarsus melitene carchemish nisibis arbela babylon opis susa',
+    portrait:'rota ard mina dara',
+    surface:'cedar linen leather bronze lapis papyrus clay basalt',
+    scene:'victory defeat guide lookout income dispatch'
+  };
+  await page.evaluate(async groups=>{
+    await Promise.all(Object.entries(groups).flatMap(([group,names])=>names.split(' ').map(async name=>{
+      const image=new Image();image.src='./art/'+group+'/'+name+'.webp';await image.decode();
+    })));
+  },gallery);
+  await page.locator('#cityScene').waitFor({state:'visible'});
+  await pins.first().click();
+  assert.ok((await page.locator('#cityScene').getAttribute('src')).endsWith('/sardis.webp'));
+  await pins.last().click();
   assert.equal(await page.locator('.cargo-art').count(),3);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1));

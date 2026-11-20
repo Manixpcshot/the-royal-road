@@ -16,3 +16,9 @@ for target in ['cpanel','vps']:
         else:
             for name in ['server.mjs','package.json','royal-road.service','README.md','test/rules.test.mjs','test/narration.test.mjs','scripts/package.py']:
                 archive.write(root/name,name)
+
+# Artists and translators can download the illustrations independently.
+with ZipFile(dist / f'royal-road-art-{version}.zip', 'w', ZIP_DEFLATED) as archive:
+    for group in ['city', 'portrait', 'surface', 'scene']:
+        for asset in sorted((public / 'art' / group).glob('*.webp')):
+            archive.write(asset, asset.relative_to(public / 'art'))
