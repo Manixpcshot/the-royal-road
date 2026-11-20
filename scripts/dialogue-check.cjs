@@ -69,29 +69,29 @@ async function verifyDialogue(browser, url, width){
  }
  await pins.nth(0).click();
  await verifyStopped();
- await page.locator('#lang').selectOption('en');
+ await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('en');
  await verifyStopped();
 
  for(const [id,contract] of contracts.entries()){
   for(const choice of [0,1]){
-   await page.locator('#restart').click();await page.locator('#confirm').click();
-   await page.locator('#load-'+id).click();
+   await page.locator('[data-zone=sound]').click();await page.locator('#restart').click();await page.locator('#confirm').click();
+   await page.locator('[data-zone=cargo]').click();await page.locator('#load-'+id).click();
    const scene=page.locator('.conversation');
    assert.ok((await scene.innerText()).includes(contract.opening[1]));
-   await page.locator('#hearStory').click();await heard('en-scene-'+id+'.mp3');
-   await page.locator('#lang').selectOption('fa');await heard('fa-scene-'+id+'.mp3');
-   await page.locator('#choice-'+choice).click();await heard('fa-reply-'+id+'-'+choice+'.mp3');
+   await page.locator('[data-zone=cargo]').click();await page.locator('#hearStory').click();await heard('en-scene-'+id+'.mp3');
+   await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('fa');await heard('fa-scene-'+id+'.mp3');
+   await page.locator('[data-zone=cargo]').click();await page.locator('#choice-'+choice).click();await heard('fa-reply-'+id+'-'+choice+'.mp3');
    assert.equal(await scene.locator('small').innerText(),voices[contract.answer[choice]].join(' / '));
    assert.ok((await scene.innerText()).includes(contract.replies[choice][0]));
    await page.locator('#undo').click();assert.ok((await scene.innerText()).includes(contract.opening[0]));
-   await page.locator('#choice-'+choice).click();
+   await page.locator('[data-zone=cargo]').click();await page.locator('#choice-'+choice).click();
    await page.goto(alias);
    assert.ok((await scene.innerText()).includes(contract.replies[choice][1]));
-   await page.locator('#hearStory').click();await heard('fa-reply-'+id+'-'+choice+'.mp3');
-   await page.locator('#lang').selectOption('en');await heard('en-reply-'+id+'-'+choice+'.mp3');
-   await page.locator('#lang').selectOption('off');
+   await page.locator('[data-zone=cargo]').click();await page.locator('#hearStory').click();await heard('fa-reply-'+id+'-'+choice+'.mp3');
+   await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('en');await heard('en-reply-'+id+'-'+choice+'.mp3');
+   await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('off');
    const count=await page.evaluate(()=>window.clips.length);
-   await page.locator('#hearStory').click();await page.locator('#lang').selectOption('en');
+   await page.locator('[data-zone=cargo]').click();await page.locator('#hearStory').click();await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('en');
    assert.equal(await page.evaluate(()=>window.clips.length),count);
    await verifyStopped();
   }
@@ -101,8 +101,8 @@ async function verifyDialogue(browser, url, width){
   const {fresh}=await import('./rules.mjs');const s=fresh();s.walls[11]=3;s.gold=0;
   localStorage.clear();localStorage.setItem('royal-road/1'+location.pathname,JSON.stringify(s));
  });
- await page.goto(home);await page.locator('#load-0').click();assert.match(await page.locator('#choice-0').innerText(),/already at maximum/);
- await page.locator('#undo').click();await page.locator('#load-1').click();
+ await page.goto(home);await page.locator('[data-zone=cargo]').click();await page.locator('#load-0').click();assert.match(await page.locator('#choice-0').innerText(),/already at maximum/);
+ await page.locator('#undo').click();await page.locator('[data-zone=cargo]').click();await page.locator('#load-1').click();
  assert.ok(await page.locator('#choice-0').isDisabled());
  for(const expired of [true,false]){
   await page.evaluate(async expired=>{
@@ -116,7 +116,7 @@ async function verifyDialogue(browser, url, width){
   await page.locator('#close').click();assert.match(await page.locator('#dialogue').innerText(),match);
   assert.match(await page.locator('.conversation').innerText(),/undelivered/);
   assert.equal(await page.locator('.choices button').count(),0);
-  await page.locator('#lang').selectOption('en');await page.locator('#voice').click();await heard(expired?'/deadline.mp3':'/loss.mp3');
+  await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('en');await page.locator('[data-zone=sound]').click();await page.locator('#voice').click();await heard(expired?'/deadline.mp3':'/loss.mp3');
  }
  assert.deepEqual(issues,[]);
  console.log('Dialogue verified',browser.browserType().name(),width,url,tested,'decoded audio files');

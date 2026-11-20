@@ -86,7 +86,7 @@ function render(){
  $('route').textContent='شهرهای متصل / Linked  '+linked(s).size+' / 12';
  $('pins').replaceChildren(...cities.map(([en,fa,x,y],i)=>{
   const b=document.createElement('button');b.className='pin';b.style.left=x/10.4+'%';b.style.top=(y+5)/5.7+'%';b.innerHTML=['○','◆','▲'][s.owners[i]]+' '+fa+'<span>'+en+'</span>';b.setAttribute('aria-pressed',i===selected);
-  b.onclick=()=>{if(selected!==i)narrator.leaveCity();selected=i;saveMap();render();$('pins').children[i].focus({preventScroll:true})};return b;
+  b.onclick=()=>{if(selected!==i)narrator.leaveCity();selected=i;openZone('council');saveMap();render();$('pins').children[i].focus({preventScroll:true})};return b;
  }));
  const [en,name]=cities[selected];$('city').innerHTML=name+' <i>'+en+'</i>';
  $('detail').textContent=owners[s.owners[selected]]+' · دژ / Fort '+s.walls[selected]+'/3';
@@ -134,12 +134,13 @@ $('undo').onclick=()=>{
  const returnedContract=previousFreight&&!s.freight?$('load-'+previousFreight.id):null;
  const pendingReply=s.freight?.choice===null&&previousFreight?.choice!==null?$('hearStory'):null;
  const target=returnedContract||pendingReply||$('orders').querySelector('button:enabled')||$('next');
+ if(returnedContract||pendingReply)openZone('cargo');
  target.focus({preventScroll:true});
 };
 $('next').onclick=()=>{undoState=null;advance(s);after()};
 $('voice').onclick=speak;$('lang').value=voice;$('lang').onchange=e=>{voice=e.target.value;try{localStorage.setItem(key+'/voice',voice)}catch{}narrator.setLanguage(voice)};
 $('close').onclick=()=>$('modal').close();
-$('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</h2><p>ذخیرهٔ این لشکرکشی جایگزین می‌شود.<br>Your current campaign save will be replaced.</p><label>درجهٔ سختی / Difficulty <select id="difficulty"><option value="scout">دیده‌بان / Scout</option><option selected value="classic">کلاسیک / Classic</option><option value="siege">محاصره / Siege</option></select></label><button id="confirm">شروع / Start</button>');$('confirm').onclick=()=>{$('modal').close();s=fresh($('difficulty').value);undoState=null;planned=false;selected=11;saveMap();after();showSelectedCity()}};
+$('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</h2><p>ذخیرهٔ این لشکرکشی جایگزین می‌شود.<br>Your current campaign save will be replaced.</p><label>درجهٔ سختی / Difficulty <select id="difficulty"><option value="scout">دیده‌بان / Scout</option><option selected value="classic">کلاسیک / Classic</option><option value="siege">محاصره / Siege</option></select></label><button id="confirm">شروع / Start</button>');$('confirm').onclick=()=>{$('modal').close();s=fresh($('difficulty').value);undoState=null;planned=false;selected=11;openZone('council');saveMap();after();showSelectedCity()}};
 $('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به سارد وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to Sardis through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p><p dir="rtl">هر قرارداد یک فرمان می‌خواهد. در کاروان‌سرا به صاحب بار پاسخ بده. در پایان هر نوبت، پس از حرکت رقیب، کاروان از راه شهرهای خودی پیش می‌رود. قطع راه کاروان را متوقف می‌کند؛ تصرف محل استقرارش بار را از بین می‌برد. هر قرارداد یک بار دستمزد می‌دهد.</p><p>Accepting freight uses one order. Answer the speaker to send the load. After each rival move, freight travels through friendly cities. A broken route stalls it. Capture of its current stop loses the cargo. Each contract pays once.</p>');
 window.addEventListener('pagehide',()=>narrator.stop());
 render();if(s.result)endScreen();
@@ -153,13 +154,18 @@ function setPanelOpen(open){
  fold.setAttribute('aria-label',open?'بستن پنل / Collapse panel':'باز کردن پنل / Expand panel');
 }
 fold.onclick=()=>setPanelOpen(layout.classList.contains('folded'));
+function openZone(zone){
+ setPanelOpen(true);
+ panels.dataset.active=zone;
+ for(const button of document.querySelectorAll('[data-zone]')){
+  button.setAttribute('aria-pressed',String(button.dataset.zone===zone));
+ }
+ panels.scrollTop=0;
+}
 document.querySelectorAll('[data-zone]').forEach(button=>{
- button.onclick=()=>{
-  setPanelOpen(true);
-  const section=$(button.dataset.zone);
-  panels.scrollTop+=section.getBoundingClientRect().top-panels.getBoundingClientRect().top;
- };
+ button.onclick=()=>openZone(button.dataset.zone);
 });
+openZone(s.freight?'cargo':'council');
 const screenButton=$('screen');
 function syncFullscreen(){
  const active=Boolean(document.fullscreenElement||document.webkitFullscreenElement||document.body.classList.contains('focus-view'));

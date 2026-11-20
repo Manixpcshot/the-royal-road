@@ -21,6 +21,16 @@ async function check(browser, url, width) {
   assert.equal(await page.locator('.cargo-art').count(),3);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1));
+  assert.ok(await page.locator('#council').isVisible());
+  assert.ok(await page.locator('#cargo').isHidden());
+  await page.locator('[data-zone=cargo]').click();
+  assert.ok(await page.locator('#cargo').isVisible());
+  assert.ok(await page.locator('#council').isHidden());
+  await pins.last().click();
+  assert.ok(await page.locator('#council').isVisible());
+  if(browser.browserType().name()==='chromium'){
+    await page.screenshot({path:'dist/royal-road-'+width+'.png'});
+  }
   await page.locator('#fold').click();
   assert.ok(await page.locator('#panels').isHidden());
   await page.locator('[data-zone="sound"]').click();
@@ -29,20 +39,20 @@ async function check(browser, url, width) {
   await page.waitForSelector('#screen[aria-pressed="true"]');
   await page.locator('#screen').click();
   await page.waitForSelector('#screen[aria-pressed="false"]');
-  await page.locator('#voice').click();
-  await page.locator('#lang').selectOption('off');
-  await page.locator('#load-0').press('Enter');
+  await page.locator('[data-zone=sound]').click();await page.locator('#voice').click();
+  await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('off');
+  await page.locator('[data-zone=cargo]').click();await page.locator('#load-0').press('Enter');
   assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
-  await page.locator('#lang').selectOption('en');
-  await page.locator('#hearStory').click();
-  await page.locator('#choice-0').press('Enter');
+  await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('en');
+  await page.locator('[data-zone=cargo]').click();await page.locator('#hearStory').click();
+  await page.locator('[data-zone=cargo]').click();await page.locator('#choice-0').press('Enter');
   assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
   await page.reload();
   assert.match(await page.locator('#freightBody').innerText(),/Opis/);
   await page.locator('#undo').click();
   assert.equal(await page.locator(':focus').getAttribute('id'),'hearStory');
   assert.ok(await page.locator('#choice-0').isVisible());
-  await page.locator('#choice-0').click();
+  await page.locator('[data-zone=cargo]').click();await page.locator('#choice-0').click();
   await page.locator('#next').click();
   assert.match(await page.locator('#ledger').innerText(),/1 \/ 3/);
   assert.match(await page.locator('#freightReport').innerText(),/Delivered/);
@@ -52,9 +62,9 @@ async function check(browser, url, width) {
     const response=await page.request.get(new URL('./audio/story/'+lang+'-street-11.mp3',page.url()).href);
     assert.equal(response.status(),200);assert.ok((await response.body()).length>2000);
   }
-  await page.locator('#restart').click();await page.locator('#confirm').click();
-  await page.locator('#lang').selectOption('off');
-  await page.locator('#plan').click();
+  await page.locator('[data-zone=sound]').click();await page.locator('#restart').click();await page.locator('#confirm').click();
+  await page.locator('[data-zone=sound]').click();await page.locator('#lang').selectOption('off');
+  await page.locator('[data-zone=reports]').click();await page.locator('#plan').click();
   assert.match(await page.locator('#estimate').innerText(),/12/);
   await pins.nth(7).click();
   await page.locator('#orders button').click();
@@ -76,9 +86,9 @@ async function check(browser, url, width) {
   assert.ok(await page.locator('#undo').isDisabled());
   await page.locator('#orders button').press('Enter');
   assert.equal(await page.locator(':focus').getAttribute('id'),'order-toll');
-  await page.locator('summary').click();
+  await page.locator('[data-zone=reports]').click();await page.locator('summary').click();
   assert.match(await page.locator('#history').innerText(),/Nisibis/);
-  await page.locator('#restart').click();
+  await page.locator('[data-zone=sound]').click();await page.locator('#restart').click();
   await page.locator('#difficulty').selectOption('scout');
   await page.locator('#confirm').click();
   await page.reload();

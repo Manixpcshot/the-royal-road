@@ -46,3 +46,44 @@ aside{display:block;padding:14px;background:#203a39}aside h2{margin:4px 0;font-s
 .freight section:not(.conversation)>div{grid-column:2}
 .freight section:not(.conversation)>div:last-child{grid-column:1/-1}
 .conversation-art{width:100%;height:74px;object-fit:contain;background:radial-gradient(ellipse at center,#5b5940,transparent 72%)}
+
+/* Campaign desk: a single status bar, a framed atlas and one open page. */
+body{background:#101d2c;color:#f6ead2}
+body>header{background:#142438;border-bottom:1px solid #947449;padding:9px clamp(10px,2vw,34px);gap:14px}
+body>header .seal{color:#efd18d;border:2px double #b99a64;background:#26374a}
+body>header #stats{margin-inline-start:auto;display:flex}
+#stats div{display:grid;grid-template-columns:auto auto;align-items:center;gap:8px;background:#203348;border:1px solid #435267;border-radius:6px;padding:6px 10px;margin:0 2px}
+#stats b{color:#ffdf95;font-size:20px}
+#screen{margin:0}body>header button{background:#22364b;border-color:#48586c}
+.layout{--rail:clamp(318px,27vw,415px)}
+.mapcard{background:#172536}.bar{background:#1c2e40;color:#e9cc90;padding:9px 16px}.bar strong{font-size:19px}
+.scroll{background:radial-gradient(ellipse at center,#536052,#253740 75%)}#board{outline:2px solid #aa9063;box-shadow:0 8px 30px #08101580}
+.pin{box-shadow:0 2px 5px #35241262;border-radius:4px;background:#f9edcf}.pin[aria-pressed=true]{outline:2px solid #175e61;background:#fff8df}
+.rail{border-color:#9b8157;background:#eee2c6;color:#302a22}
+.rail nav{background:#18293c;border-color:#71664d}.rail nav button{color:#d8dbe0;padding:9px 4px}.rail nav small{color:#c0bcc0}
+.rail nav button[aria-pressed=true]{background:#2c4151;color:#ffe5a7;box-shadow:inset 0 -3px #dfb671}
+#panels{flex:1;background:linear-gradient(145deg,#f9f0db,#e8d9b8);scrollbar-color:#a18e6a #ede2ca}
+#panels>*,#panels>aside{display:none}
+#panels[data-active=council]>aside,#panels[data-active=council]>.street,#panels[data-active=cargo]>#cargo,#panels[data-active=reports]>#chronicle,#panels[data-active=sound]>#sound{display:block}
+#panels[data-active=reports]>#reports{display:grid}#panels[data-active=sound]>footer{display:flex}
+#panels #council{background:linear-gradient(125deg,#20344b,#2c4e59);color:#fff3d9;padding:18px;border-bottom:3px solid #b79962}
+#council::before{height:85px;width:90px;top:7px;right:12px}#council h2{font-size:30px;margin-block:9px}
+#orders{margin-top:16px}
+#orders button,.turn-controls button,.rail #panels button{border-radius:7px}
+#orders button,.rail #panels button{background:#253f49;color:#fff4db;border:1px solid #527077}
+.turn-controls{display:flex;align-items:stretch;gap:8px;padding:10px;background:#192b3c;border-top:1px solid #7b705b}
+.turn-controls #undo,.turn-controls #next{width:auto;margin:0}.turn-controls #undo{flex:1;color:#dce1e1;background:#24384a}.turn-controls #next{flex:1.4;background:#edc375;color:#28251f}
+.folded .turn-controls{display:none}
+#panels .street,#panels .freight,#panels .dispatch,#panels .intel,#panels footer{background:transparent;color:#302a22;border:0}
+#panels .street{padding:14px}.street #streetArt{display:block;max-height:125px;border-radius:6px}.street strong,#panels .freight strong{color:#54391e}
+#panels .translation,#panels p span,#panels small,#panels summary{color:#66523c}
+#panels button small,#panels button .translation,#panels #council small{color:#e2d4b6}
+#panels .freight section{background:#fff7e5;color:#382f25;border:1px solid #c9b58f;border-radius:9px}
+#panels .freight section>div:first-child,#panels .conversation small{color:#644921}
+#panels .freight header{border-color:#c7b68d}
+#panels footer select{color:#fff;background:#243c49}#panels .dispatch button{margin-top:12px}
+#panels .dispatch p{margin-top:8px}
+#panels #history{max-height:none}
+@media(max-width:760px){body>header{gap:5px;padding:6px}body>header h1{font-size:17px}body>header h1 i{display:block;font-size:10px}body>header button{font-size:11px;padding:5px}#stats div{grid-template-columns:auto;padding:3px 4px;gap:0;margin:0 1px}#stats b{font-size:15px}#stats small{font-size:9px}.bar{padding:5px 8px}.bar strong{font-size:14px}.rail nav button{padding:4px}#panels #council{padding:9px 12px}#council h2{font-size:21px;margin:4px 0}#council::before{height:55px;width:69px}#orders{margin:6px 0}.turn-controls{padding:5px 9px}.turn-controls button{min-height:35px}.rail{min-width:0}.layout{grid-template-rows:minmax(0,1fr) minmax(0,45%)}}
+@media(max-height:480px) and (orientation:landscape){.layout{grid-template-rows:minmax(0,1fr)}}
+.focus-view>header #stats{display:none}
