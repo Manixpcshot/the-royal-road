@@ -50,7 +50,7 @@ function terrain(c){
 }
 const landmarks=new Map();
 export async function loadLandmarks(){
- await Promise.all(['palace','fort','tower','market','caravan'].map(async kind=>{
+ await Promise.all(['palace','fort','tower','market','caravan','terrain'].map(async kind=>{
   const image=new Image();
   image.src=new URL('./art/'+kind+'.webp',import.meta.url);
   try{await image.decode();landmarks.set(kind,image)}catch{}
@@ -61,12 +61,26 @@ export function draw(canvas,s,selected,path=[]){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
  if(canvas.width!==1040*scale||canvas.height!==570*scale){canvas.width=1040*scale;canvas.height=570*scale}
  c.setTransform(scale,0,0,scale,0,0);
- if(!background||background.width!==canvas.width){
-  background=document.createElement('canvas');background.width=canvas.width;background.height=canvas.height;
-  const brush=background.getContext('2d');brush.scale(scale,scale);terrain(brush);
+ const landscape=landmarks.get('terrain');
+ if(landscape){
+  c.drawImage(landscape,0,0,1040,570);
+ }else{
+  if(!background||background.width!==canvas.width){
+   background=document.createElement('canvas');background.width=canvas.width;background.height=canvas.height;
+   const brush=background.getContext('2d');brush.scale(scale,scale);terrain(brush);
+  }
+  c.drawImage(background,0,0,1040,570);
  }
- c.drawImage(background,0,0,1040,570);
- for(const [a,b] of roads){const A=cities[a],B=cities[b];c.beginPath();c.moveTo(A[2],A[3]);c.lineTo(B[2],B[3]);const held=s.owners[a]===1&&s.owners[b]===1;c.setLineDash(held?[]:[5,5]);c.lineWidth=held?4:2;c.strokeStyle=held?'#24756a':'#9b815e';c.stroke()}c.setLineDash([]);
+ c.save();
+ c.lineCap='round';
+ for(const [a,b] of roads){
+  const A=cities[a],B=cities[b],held=s.owners[a]===1&&s.owners[b]===1;
+  c.beginPath();c.moveTo(A[2],A[3]);c.lineTo(B[2],B[3]);
+  c.lineWidth=held?6:4;c.strokeStyle='#382d21ab';c.stroke();
+  c.lineWidth=held?3:2;c.setLineDash(held?[]:[5,6]);
+  c.strokeStyle=held?'#85ead4':'#ffe5ac';c.stroke();c.setLineDash([]);
+ }
+ c.restore();
  if(path.length){
   c.beginPath();path.forEach((i,k)=>{const [,,x,y]=cities[i];if(k)c.lineTo(x,y);else c.moveTo(x,y)});
   c.strokeStyle='#60402a';c.lineWidth=6;c.stroke();c.strokeStyle='#ffd060';c.lineWidth=3;c.stroke();
@@ -74,7 +88,7 @@ export function draw(canvas,s,selected,path=[]){
  cities.forEach((city,i)=>{const [,,x,y,kind]=city,col=colors[s.owners[i]];c.beginPath();c.ellipse(x,y,24,10,0,0,Math.PI*2);c.fillStyle=i===selected?'#fff2bd':'#93764a55';c.fill();if(i===selected){c.strokeStyle='#237c71';c.lineWidth=2;c.stroke()}
  const landmark=landmarks.get(kind);
  if(landmark){
-  const height=kind==='palace'?56:44;
+  const height=kind==='palace'?66:51;
   const width=height*landmark.width/landmark.height;
   c.drawImage(landmark,x-width/2,y-height+2,width,height);
   c.fillStyle=col;c.fillRect(x+15,y-10,3,9);

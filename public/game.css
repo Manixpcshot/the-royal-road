@@ -87,3 +87,15 @@ body>header #stats{margin-inline-start:auto;display:flex}
 @media(max-width:760px){body>header{gap:5px;padding:6px}body>header h1{font-size:17px}body>header h1 i{display:block;font-size:10px}body>header button{font-size:11px;padding:5px}#stats div{grid-template-columns:auto;padding:3px 4px;gap:0;margin:0 1px}#stats b{font-size:15px}#stats small{font-size:9px}.bar{padding:5px 8px}.bar strong{font-size:14px}.rail nav button{padding:4px}#panels #council{padding:9px 12px}#council h2{font-size:21px;margin:4px 0}#council::before{height:55px;width:69px}#orders{margin:6px 0}.turn-controls{padding:5px 9px}.turn-controls button{min-height:35px}.rail{min-width:0}.layout{grid-template-rows:minmax(0,1fr) minmax(0,45%)}}
 @media(max-height:480px) and (orientation:landscape){.layout{grid-template-rows:minmax(0,1fr)}}
 .focus-view>header #stats{display:none}
+
+/* Let the landscape extend into the margins around the playable atlas. */
+.scroll{background:linear-gradient(0deg,#132521cf,#263b35a8),url('./art/terrain.webp') center/cover}
+#board{outline:1px solid #dbc596;box-shadow:0 0 0 5px #21322bc9,0 12px 38px #111d18bf}
+.pin{color:#fff4d8;background:#342f25;border:1px solid #d6bd87;border-radius:2px 2px 6px 6px;padding:3px 7px;box-shadow:0 2px 5px #241a12b0}
+.pin[data-owner="1"]{background:#17463f}.pin[data-owner="2"]{background:#652e28}
+.pin span{color:#efdbb6;font-weight:normal}.pin:hover,.pin[aria-pressed=true]{background:#ffe5a8;color:#31281b}.pin:hover span,.pin[aria-pressed=true] span{color:#46351c}
+.pin[aria-pressed=true]{outline:2px solid #584121;box-shadow:0 0 0 4px #ffe6a7ad}
+.pin:focus-visible{outline:3px solid white}
+#panels #council{background:linear-gradient(100deg,#182f31 22%,#253b33e6),url('./art/terrain.webp') center/cover}
+.bar,.turn-controls{background:#1b2d30}.rail nav,body>header{background:#14272a}
+@media(max-width:760px){.pin{padding:2px 4px}}

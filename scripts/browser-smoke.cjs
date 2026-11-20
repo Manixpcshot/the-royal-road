@@ -12,7 +12,7 @@ async function check(browser, url, width) {
   const pins=page.locator('.pin');
   await pins.last().waitFor();
   assert.equal(await pins.count(),12);
-  for(const asset of ['palace','fort','tower','market','caravan','daric','flour','letter','indigo']){
+  for(const asset of ['terrain','palace','fort','tower','market','caravan','daric','flour','letter','indigo']){
     const size=await page.evaluate(async name=>{
       const image=new Image();image.src='./art/'+name+'.webp';await image.decode();return image.naturalWidth;
     },asset);

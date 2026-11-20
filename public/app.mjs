@@ -85,7 +85,7 @@ function render(){
  $('stats').innerHTML=stat('نوبت','Turn',Math.min(14,s.turn)+'/14')+stat('فرمان','Orders',s.ap+'/2')+stat('سکه','Gold',s.gold);
  $('route').textContent='شهرهای متصل / Linked  '+linked(s).size+' / 12';
  $('pins').replaceChildren(...cities.map(([en,fa,x,y],i)=>{
-  const b=document.createElement('button');b.className='pin';b.style.left=x/10.4+'%';b.style.top=(y+5)/5.7+'%';b.innerHTML=['○','◆','▲'][s.owners[i]]+' '+fa+'<span>'+en+'</span>';b.setAttribute('aria-pressed',i===selected);
+  const b=document.createElement('button');b.className='pin';b.dataset.owner=s.owners[i];b.style.left=x/10.4+'%';b.style.top=(y+5)/5.7+'%';b.innerHTML=['○','◆','▲'][s.owners[i]]+' '+fa+'<span>'+en+'</span>';b.setAttribute('aria-pressed',i===selected);
   b.onclick=()=>{if(selected!==i)narrator.leaveCity();selected=i;openZone('council');saveMap();render();$('pins').children[i].focus({preventScroll:true})};return b;
  }));
  const [en,name]=cities[selected];$('city').innerHTML=name+' <i>'+en+'</i>';
