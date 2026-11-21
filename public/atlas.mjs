@@ -56,8 +56,26 @@ export async function loadLandmarks(){
   try{await image.decode();landmarks.set(kind,image)}catch{}
  }));
 }
+// Clip the campaign land outline to the half-planes nearest each city.
+const districts=cities.map(([, ,x,y])=>{
+ let shape=[[0,0],[1040,0],[1040,570],[432,570],[382,522],[309,508],[234,477],[166,447],[102,418],[65,365],[0,344]];
+ for(const [, ,ox,oy] of cities){
+  if(x===ox&&y===oy)continue;
+  const distance=([px,py])=>(px-(x+ox)/2)*(ox-x)+(py-(y+oy)/2)*(oy-y);
+  const clipped=[];
+  for(let i=0;i<shape.length;i++){
+   const a=shape[i],b=shape[(i+1)%shape.length],da=distance(a),db=distance(b);
+   if(da<=0)clipped.push(a);
+   if((da<=0)!==(db<=0)){
+    const t=da/(da-db);clipped.push([a[0]+t*(b[0]-a[0]),a[1]+t*(b[1]-a[1])]);
+   }
+  }
+  shape=clipped;
+ }
+ return shape;
+});
 let background;
-export function draw(canvas,s,selected,path=[]){
+export function draw(canvas,s,selected,path=[],territories=true){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
  if(canvas.width!==1040*scale||canvas.height!==570*scale){canvas.width=1040*scale;canvas.height=570*scale}
  c.setTransform(scale,0,0,scale,0,0);
@@ -70,6 +88,10 @@ export function draw(canvas,s,selected,path=[]){
    const brush=background.getContext('2d');brush.scale(scale,scale);terrain(brush);
   }
   c.drawImage(background,0,0,1040,570);
+ }
+ if(territories){
+  const fills=['#283c4229','#007b7390','#a32f4290'];
+  districts.forEach((shape,i)=>polygon(c,shape,fills[s.owners[i]],'#f1e9bcba'));
  }
  c.save();
  c.lineCap='round';

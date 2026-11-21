@@ -39,6 +39,6 @@ jobs:
           version="v$(node -p "require('./package.json').version")"
           if [ "$GITHUB_REF_TYPE" = tag ]; then test "$version" = "$GITHUB_REF_NAME"; fi
           if gh release view "$version" >/dev/null 2>&1; then exit 0; fi
-          gh release create "$version" dist/*.zip dist/royal-road-*.png --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Thirty new illustrations: twelve cities, four speaking characters, eight interface materials and six story panels. Includes mobile and desktop screenshots."
+          gh release create "$version" dist/*.zip dist/royal-road-*.png --target "$GITHUB_SHA" --title "شاهراه · The Royal Road $version" --notes "Map-first tactical HUD with live territory colors, selectable map layers, city-centered zoom and compact command controls. Includes mobile and desktop screenshots."
         env:
           GH_TOKEN: ${{ github.token }}

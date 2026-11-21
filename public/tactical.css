@@ -1,0 +1,51 @@
+/* Compact strategic HUD. The board and command tray have separate hit areas. */
+body{background:#172126}
+body>header{padding:4px 12px;background:#172127;border-bottom:1px solid #53686c;gap:10px}
+body>header .seal{width:28px;height:28px;font-size:20px}
+body>header h1{font-size:18px}body>header>div>small{display:none}
+body>header #stats div{background:#223139;border:0;border-inline-start:2px solid #50858a;border-radius:2px;padding:2px 8px}
+#stats b{font:700 16px/1.2 system-ui}body>header button{padding:3px 8px}
+.layout,.layout.folded{display:flex;flex-direction:column;min-width:0}
+.mapcard{flex:1;min-height:0;position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto}
+.mapcard>.bar:first-child{position:absolute;z-index:1;top:6px;left:8px;display:flex;gap:8px;pointer-events:none;background:#132025e8;border:1px solid #6f8181;border-radius:4px;padding:4px 8px}
+.mapcard>.bar:first-child strong{font:600 12px Tahoma,Arial}.mapcard>.bar:first-child span{font-size:10px}
+.scroll{display:block;align-content:safe center;background:linear-gradient(#152326db,#152326db),url('./art/terrain.webp') center/cover;overscroll-behavior:contain;scrollbar-width:thin}
+#board{width:calc(max(545px,min(100cqw,182.45cqh)) * var(--map-scale,1));min-width:0;margin:auto}
+.bar.bottom{justify-content:space-between;flex-wrap:nowrap;padding:2px 9px;background:#1a272d;border-top:1px solid #516165}
+.map-tools{display:flex;align-items:center;gap:4px}
+.map-tools button{background:#293b43;border:1px solid #4c6167;color:#edf8f6;border-radius:3px;min-width:31px;padding:3px 7px;font:600 15px system-ui}
+.map-tools #territories{font-size:12px}.map-tools small{display:inline;color:inherit;font:10px system-ui}
+.map-tools [aria-pressed=true]{box-shadow:inset 0 -2px #4cd3ba}.map-tools output{font:11px monospace;color:#d0e2de}
+.rail{flex:none;display:grid;grid-template-columns:clamp(148px,16vw,220px) minmax(0,1fr) clamp(138px,15vw,200px);height:clamp(154px,24dvh,225px);border:0;border-top:1px solid #607378;background:#1c2a2e}
+.rail nav,.folded .rail nav{display:grid;grid-template-columns:1fr 1fr;align-content:center;padding:5px;gap:3px;background:#18262c;border:0}
+.rail nav button{padding:4px;color:#d8e6e6;background:#263940;border:1px solid #42595e;border-radius:3px}
+.rail nav button[aria-pressed=true]{background:#254d4c;box-shadow:inset 3px 0 #57d1b4}
+.rail #fold{grid-column:1/-1;max-width:none;line-height:12px;font-size:15px}
+#panels{min-width:0;min-height:0;display:block}
+#panels[data-active=council]{display:grid;grid-template-columns:minmax(190px,.85fr) minmax(220px,1.15fr);align-content:start}
+#panels #council{padding:9px 13px;border:0;min-height:100%}
+#council h2{font-size:21px;margin:3px 0}#council::before{width:53px;height:49px}
+#council h2,#council #detail{padding-inline-end:48px}#orders{margin:6px 0}
+#panels .street{padding:8px 12px}#cityScene{max-height:90px}
+.turn-controls{flex-direction:column;justify-content:center;padding:8px;border:0;background:#18262c}
+.turn-controls #next,.turn-controls #undo{flex:0 0 auto}.turn-controls #next{background:#54baa2;color:#102c28}
+.layout.folded .rail{height:auto;display:flex;flex-direction:row;align-items:stretch}
+.layout.folded nav{display:flex;flex:1}.layout.folded #fold{transform:rotate(180deg)}
+.layout.folded .turn-controls{display:flex;flex-direction:row;padding:4px}
+@media(max-width:760px){
+ body>header{gap:4px;padding:3px}body>header #stats div{padding:2px 4px}
+ .rail{height:clamp(175px,35dvh,305px);display:flex;flex-direction:column}
+ .rail nav,.folded .rail nav{display:flex;padding:3px}.rail nav button{min-height:32px;padding:2px}
+ #panels[data-active=council]{display:block}
+ .turn-controls{flex-direction:row;padding:4px}.turn-controls #next,.turn-controls #undo{flex:1}
+ .layout.folded .rail{display:flex;flex-direction:column}
+ .mapcard>.bar:first-child{top:3px;left:3px}.mapcard>.bar:first-child span{display:none}
+ .bar.bottom{font-size:10px}.map-tools button{min-height:30px}
+}
+@media(orientation:landscape) and (max-height:520px){
+ .layout,.layout.folded{flex-direction:row}.rail,.layout.folded .rail{width:220px;height:auto;display:flex;flex-direction:column}
+ .rail nav,.folded .rail nav{display:flex;align-items:center}.rail nav button{min-width:0;padding:2px}
+ #panels[data-active=council]{display:block}.layout.folded .rail{width:68px}.layout.folded nav,.layout.folded .turn-controls{flex-direction:column}
+}
+
+.layout.folded #panels{display:none}

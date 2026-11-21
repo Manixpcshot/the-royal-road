@@ -12,6 +12,13 @@ async function check(browser, url, width) {
   const pins=page.locator('.pin');
   await pins.last().waitFor();
   assert.equal(await pins.count(),12);
+  const initialWidth=await page.locator('#board').evaluate(el=>el.clientWidth);
+  await page.locator('#zoomIn').click();
+  assert.ok(await page.locator('#board').evaluate(el=>el.clientWidth)>initialWidth);
+  await page.locator('#zoomOut').click();
+  const overlay=page.locator('#territories');
+  await overlay.click();assert.equal(await overlay.getAttribute('aria-pressed'),'false');
+  await overlay.click();
   for(const asset of ['terrain','palace','fort','tower','market','caravan','daric','flour','letter','indigo']){
     const size=await page.evaluate(async name=>{
       const image=new Image();image.src='./art/'+name+'.webp';await image.decode();return image.naturalWidth;
