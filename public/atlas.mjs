@@ -74,6 +74,17 @@ const districts=cities.map(([, ,x,y])=>{
  }
  return shape;
 });
+const outlines=districts.map(points=>{
+ const path=new Path2D();
+ points.forEach(([x,y],i)=>i?path.lineTo(x,y):path.moveTo(x,y));
+ path.closePath();return path;
+});
+export function districtAt(canvas,x,y){
+ const context=canvas.getContext('2d');
+ context.save();context.resetTransform();
+ const index=outlines.findIndex(path=>context.isPointInPath(path,x,y));
+ context.restore();return index;
+}
 let background;
 export function draw(canvas,s,selected,path=[],territories=true){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
@@ -92,6 +103,7 @@ export function draw(canvas,s,selected,path=[],territories=true){
  if(territories){
   const fills=['#283c4229','#007b7390','#a32f4290'];
   districts.forEach((shape,i)=>polygon(c,shape,fills[s.owners[i]],'#f1e9bcba'));
+  c.save();c.strokeStyle='#ffe49c';c.lineWidth=2.5;c.setLineDash([8,4]);c.stroke(outlines[selected]);c.restore();
  }
  c.save();
  c.lineCap='round';

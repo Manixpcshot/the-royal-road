@@ -49,3 +49,12 @@ body>header #stats div{background:#223139;border:0;border-inline-start:2px solid
 }
 
 .layout.folded #panels{display:none}
+
+#pins{pointer-events:none}
+#pins .pin{pointer-events:auto}
+#atlas{touch-action:none;user-select:none;cursor:grab}
+#atlas:active{cursor:grabbing}
+@media(pointer:coarse){
+ .map-tools button{min-height:36px;min-width:36px}
+ .rail nav button{min-height:36px}
+}

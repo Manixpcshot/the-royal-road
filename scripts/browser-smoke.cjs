@@ -16,6 +16,39 @@ async function check(browser, url, width) {
   await page.locator('#zoomIn').click();
   assert.ok(await page.locator('#board').evaluate(el=>el.clientWidth)>initialWidth);
   await page.locator('#zoomOut').click();
+  const point=await page.evaluate(async()=>{
+    const {districtAt}=await import('./atlas.mjs');
+    const canvas=document.querySelector('#atlas'),rect=canvas.getBoundingClientRect();
+    for(let y=60;y<innerHeight;y+=14)for(let x=12;x<innerWidth;x+=14){
+      if(document.elementFromPoint(x,y)!==canvas)continue;
+      const index=districtAt(canvas,(x-rect.left)*1040/rect.width,(y-rect.top)*570/rect.height);
+      if(index>=0&&index!==11)return {x,y,index};
+    }
+    throw Error('No selectable district in viewport');
+  });
+  await page.mouse.click(point.x,point.y);
+  assert.equal(await pins.nth(point.index).getAttribute('aria-pressed'),'true');
+  await page.mouse.wheel(0,-120);
+  await page.waitForFunction(()=>document.querySelector('#zoomValue').textContent!=='100%');
+  await page.locator('#zoomOut').click();
+  if(width===390&&browser.browserType().name()==='chromium'){
+    const center=await page.evaluate(()=>{
+      const canvas=document.querySelector('#atlas');
+      for(let y=70;y<innerHeight;y+=15)for(let x=90;x<innerWidth-90;x+=15){
+        if([-45,-20,20,45].every(dx=>document.elementFromPoint(x+dx,y)===canvas))return {x,y};
+      }
+      throw Error('No visible pinch target');
+    });
+    const cdp=await page.context().newCDPSession(page);
+    const touches=span=>[-span,span].map((dx,id)=>({x:center.x+dx,y:center.y,id}));
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchStart',touchPoints:touches(20)});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchMove',touchPoints:touches(45)});
+    await cdp.send('Input.dispatchTouchEvent',{type:'touchEnd',touchPoints:[]});
+    assert.equal(await page.locator('#zoomValue').textContent(),'200%');
+    assert.equal(await pins.nth(point.index).getAttribute('aria-pressed'),'true');
+    for(let i=0;i<4;i++)await page.locator('#zoomOut').click();
+    await cdp.detach();
+  }
   const overlay=page.locator('#territories');
   await overlay.click();assert.equal(await overlay.getAttribute('aria-pressed'),'false');
   await overlay.click();

@@ -3,7 +3,7 @@ import {renderCaravan} from './caravan-ui.mjs';
 import {receipts} from './stories.mjs';
 import {recorded} from './performance.mjs';
 import {createNarrator} from './narration.mjs';
-import {draw,loadLandmarks} from './atlas.mjs';
+import {draw,loadLandmarks,districtAt} from './atlas.mjs';
 const $=id=>document.getElementById(id);
 const key='royal-road/1'+location.pathname.replace(/\/index\.html$/,'/');
 let territories=true,zoom=1;
@@ -27,7 +27,7 @@ try{
   if(Number.isInteger(view?.selected)&&view.selected>=0&&view.selected<cities.length)selected=view.selected;
   planned=view?.planned===true;
   territories=view?.territories!==false;
-  if([1,1.25,1.5,1.75,2].includes(view?.zoom))zoom=view.zoom;
+  if(Number.isFinite(view?.zoom)&&view.zoom>=1&&view.zoom<=2)zoom=view.zoom;
  }catch{}
  const savedVoice=localStorage.getItem(key+'/voice')??localStorage.getItem(key+'index.html/voice');
  if(['en','fa','off'].includes(savedVoice))voice=savedVoice;
@@ -155,6 +155,63 @@ function applyMapScale(){
  $('zoomValue').textContent=Math.round(zoom*100)+'%';
  $('zoomOut').disabled=zoom<=1;$('zoomIn').disabled=zoom>=2;
 }
+const surface=$('atlas'),viewport=document.querySelector('.scroll');
+function mapPoint(x,y){
+ const rect=surface.getBoundingClientRect();
+ return {x:(x-rect.left)/rect.width,y:(y-rect.top)/rect.height};
+}
+function scaleAt(value,anchor,x,y){
+ zoom=Math.max(1,Math.min(2,value));applyMapScale();
+ const rect=surface.getBoundingClientRect();
+ viewport.scrollLeft+=rect.left+anchor.x*rect.width-x;
+ viewport.scrollTop+=rect.top+anchor.y*rect.height-y;
+}
+surface.addEventListener('wheel',event=>{
+ if(event.ctrlKey||event.metaKey||!event.deltaY)return;
+ event.preventDefault();
+ scaleAt(zoom-Math.sign(event.deltaY)*.125,mapPoint(event.clientX,event.clientY),event.clientX,event.clientY);
+ saveMap();
+},{passive:false});
+const pointers=new Map();
+let gesture=null,moved=false;
+function pinch(){
+ const [a,b]=pointers.values(),x=(a.x+b.x)/2,y=(a.y+b.y)/2;
+ return {x,y,distance:Math.max(1,Math.hypot(a.x-b.x,a.y-b.y))};
+}
+surface.onpointerdown=event=>{
+ if(event.button!==0||pointers.size>=2)return;
+ surface.setPointerCapture(event.pointerId);
+ pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ if(pointers.size===1){
+  moved=false;gesture={x:event.clientX,y:event.clientY,left:viewport.scrollLeft,top:viewport.scrollTop};
+ }else{
+  const pair=pinch();moved=true;gesture={zoom,distance:pair.distance,anchor:mapPoint(pair.x,pair.y)};
+ }
+};
+surface.onpointermove=event=>{
+ if(!pointers.has(event.pointerId))return;
+ pointers.set(event.pointerId,{x:event.clientX,y:event.clientY});
+ if(pointers.size===2){
+  const pair=pinch();scaleAt(gesture.zoom*pair.distance/gesture.distance,gesture.anchor,pair.x,pair.y);
+ }else{
+  const dx=event.clientX-gesture.x,dy=event.clientY-gesture.y;
+  if(Math.hypot(dx,dy)>5)moved=true;
+  if(moved){viewport.scrollLeft=gesture.left-dx;viewport.scrollTop=gesture.top-dy}
+ }
+};
+function finishGesture(event){
+ if(!pointers.delete(event.pointerId))return;
+ if(pointers.size){
+  const [point]=pointers.values();gesture={...point,left:viewport.scrollLeft,top:viewport.scrollTop};moved=true;return;
+ }
+ if(event.type==='pointerup'&&!moved&&territories){
+  const point=mapPoint(event.clientX,event.clientY);
+  const city=districtAt(surface,point.x*1040,point.y*570);
+  if(city>=0)$('pins').children[city].click();
+ }
+ saveMap();
+}
+surface.onpointerup=surface.onpointercancel=surface.onlostpointercapture=finishGesture;
 function changeZoom(step){
  zoom=Math.max(1,Math.min(2,zoom+step));
  applyMapScale();showSelectedCity();saveMap();
