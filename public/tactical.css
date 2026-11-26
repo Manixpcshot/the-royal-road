@@ -10,7 +10,7 @@ body>header #stats div{background:#223139;border:0;border-inline-start:2px solid
 .mapcard>.bar:first-child{position:absolute;z-index:1;top:6px;left:8px;display:flex;gap:8px;pointer-events:none;background:#132025e8;border:1px solid #6f8181;border-radius:4px;padding:4px 8px}
 .mapcard>.bar:first-child strong{font:600 12px Tahoma,Arial}.mapcard>.bar:first-child span{font-size:10px}
 .scroll{display:block;align-content:safe center;background:linear-gradient(#152326db,#152326db),url('./art/terrain.webp') center/cover;overscroll-behavior:contain;scrollbar-width:thin}
-#board{width:calc(max(545px,min(100cqw,182.45cqh)) * var(--map-scale,1));min-width:0;margin:auto}
+#board{aspect-ratio:1600/640;width:calc(max(840px,min(100cqw,250cqh)) * var(--map-scale,1));min-width:0;margin:auto}
 .bar.bottom{justify-content:space-between;flex-wrap:nowrap;padding:2px 9px;background:#1a272d;border-top:1px solid #516165}
 .map-tools{display:flex;align-items:center;gap:4px}
 .map-tools button{background:#293b43;border:1px solid #4c6167;color:#edf8f6;border-radius:3px;min-width:31px;padding:3px 7px;font:600 15px system-ui}
@@ -58,3 +58,5 @@ body>header #stats div{background:#223139;border:0;border-inline-start:2px solid
  .map-tools button{min-height:36px;min-width:36px}
  .rail nav button{min-height:36px}
 }
+
+#goalTitle{pointer-events:auto;background:#203538;color:#ffdfa0;font:600 12px Tahoma,sans-serif;border:1px solid #79816d;padding:4px 8px}#goalTitle::after{content:" ▾"}

@@ -1,4 +1,4 @@
-import {cities,roads} from './rules.mjs';
+import {cities,roads,mapWidth,mapHeight} from './rules.mjs';
 const colors=['#846e4a','#116d65','#923f33'];
 // Polygon meshes in local XYZ coordinates. Back-to-front orthographic projection
 // lets the map run on devices without WebGL.
@@ -58,7 +58,7 @@ export async function loadLandmarks(){
 }
 // Clip the campaign land outline to the half-planes nearest each city.
 const districts=cities.map(([, ,x,y])=>{
- let shape=[[0,0],[1040,0],[1040,570],[432,570],[382,522],[309,508],[234,477],[166,447],[102,418],[65,365],[0,344]];
+ let shape=[[0,0],[mapWidth,0],[mapWidth,mapHeight],[325,mapHeight],[258,605],[178,596],[120,571],[48,546],[0,493]];
  for(const [, ,ox,oy] of cities){
   if(x===ox&&y===oy)continue;
   const distance=([px,py])=>(px-(x+ox)/2)*(ox-x)+(py-(y+oy)/2)*(oy-y);
@@ -88,17 +88,17 @@ export function districtAt(canvas,x,y){
 let background;
 export function draw(canvas,s,selected,path=[],territories=true){
  const c=canvas.getContext('2d');const scale=Math.min(2,window.devicePixelRatio||1);
- if(canvas.width!==1040*scale||canvas.height!==570*scale){canvas.width=1040*scale;canvas.height=570*scale}
+ if(canvas.width!==mapWidth*scale||canvas.height!==mapHeight*scale){canvas.width=mapWidth*scale;canvas.height=mapHeight*scale}
  c.setTransform(scale,0,0,scale,0,0);
  const landscape=landmarks.get('terrain');
  if(landscape){
-  c.drawImage(landscape,0,0,1040,570);
+  c.drawImage(landscape,0,0,mapWidth,mapHeight);
  }else{
   if(!background||background.width!==canvas.width){
    background=document.createElement('canvas');background.width=canvas.width;background.height=canvas.height;
-   const brush=background.getContext('2d');brush.scale(scale,scale);terrain(brush);
+   const brush=background.getContext('2d');brush.scale(scale*mapWidth/1040,scale*mapHeight/570);terrain(brush);
   }
-  c.drawImage(background,0,0,1040,570);
+  c.drawImage(background,0,0,mapWidth,mapHeight);
  }
  if(territories){
   const fills=['#283c4229','#007b7390','#a32f4290'];

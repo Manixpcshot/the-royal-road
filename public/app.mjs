@@ -1,4 +1,4 @@
-import {cities,dispatch,fresh,legal,order,advance,linked,cost,valid,income,itinerary,forecast,nearby} from './rules.mjs';
+import {easternGoal,mapWidth,mapHeight,resumeCampaign,cities,dispatch,fresh,legal,order,advance,linked,cost,valid,income,itinerary,forecast,nearby} from './rules.mjs';
 import {renderCaravan} from './caravan-ui.mjs';
 import {receipts} from './stories.mjs';
 import {recorded} from './performance.mjs';
@@ -14,10 +14,10 @@ try{
   if(!raw)continue;
   try{
    const data=JSON.parse(raw);
-   const campaign=data?.campaign??data;
-   if(!valid(campaign))continue;
+   const campaign=resumeCampaign(data?.campaign??data);
+   if(!campaign)continue;
    s=campaign;
-   const undo=data.undo;
+   const undo=resumeCampaign(data.undo);
    if(!s.result&&valid(undo)&&!undo.result&&undo.turn===s.turn&&undo.mode===s.mode)undoState=undo;
    break;
   }catch{}
@@ -87,9 +87,10 @@ function render(){
  if(!$('history').children.length)$('history').textContent='هنوز رویدادی ثبت نشده / No entries yet';
  const stat=(a,b,n)=>'<div><small>'+a+' / '+b+'</small><b>'+n+'</b></div>';
  $('stats').innerHTML=stat('نوبت','Turn',Math.min(14,s.turn)+'/14')+stat('فرمان','Orders',s.ap+'/2')+stat('سکه','Gold',s.gold);
- $('route').textContent='شهرهای متصل / Linked  '+linked(s).size+' / 12';
+ $('route').textContent='شهرهای متصل / Linked  '+linked(s).size+' / '+cities.length;
+ $('goalTitle').textContent='شوش تا '+cities[s.goal??0][1]+' · Susa to '+cities[s.goal??0][0];
  $('pins').replaceChildren(...cities.map(([en,fa,x,y],i)=>{
-  const b=document.createElement('button');b.className='pin';b.dataset.owner=s.owners[i];b.style.left=x/10.4+'%';b.style.top=(y+5)/5.7+'%';b.innerHTML=['○','◆','▲'][s.owners[i]]+' '+fa+'<span>'+en+'</span>';b.setAttribute('aria-pressed',i===selected);
+  const b=document.createElement('button');b.className='pin';b.dataset.owner=s.owners[i];b.style.left=100*x/mapWidth+'%';b.style.top=100*(y+5)/mapHeight+'%';b.innerHTML=['○','◆','▲'][s.owners[i]]+' '+fa+'<span>'+en+'</span>';b.setAttribute('aria-pressed',i===selected);
   b.onclick=()=>{if(selected!==i)narrator.leaveCity();selected=i;openZone('council');saveMap();render();$('pins').children[i].focus({preventScroll:true})};return b;
  }));
  const [en,name]=cities[selected];$('city').innerHTML=name+' <i>'+en+'</i>';
@@ -147,8 +148,9 @@ $('undo').onclick=()=>{
 $('next').onclick=()=>{undoState=null;advance(s);after()};
 $('voice').onclick=speak;$('lang').value=voice;$('lang').onchange=e=>{voice=e.target.value;try{localStorage.setItem(key+'/voice',voice)}catch{}narrator.setLanguage(voice)};
 $('close').onclick=()=>$('modal').close();
-$('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</h2><p>ذخیرهٔ این لشکرکشی جایگزین می‌شود.<br>Your current campaign save will be replaced.</p><label>درجهٔ سختی / Difficulty <select id="difficulty"><option value="scout">دیده‌بان / Scout</option><option selected value="classic">کلاسیک / Classic</option><option value="siege">محاصره / Siege</option></select></label><button id="confirm">شروع / Start</button>');$('confirm').onclick=()=>{$('modal').close();s=fresh($('difficulty').value);undoState=null;planned=false;selected=11;openZone('council');saveMap();after();showSelectedCity()}};
-$('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به سارد وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to Sardis through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p><p dir="rtl">هر قرارداد یک فرمان می‌خواهد. در کاروان‌سرا به صاحب بار پاسخ بده. در پایان هر نوبت، پس از حرکت رقیب، کاروان از راه شهرهای خودی پیش می‌رود. قطع راه کاروان را متوقف می‌کند؛ تصرف محل استقرارش بار را از بین می‌برد. هر قرارداد یک بار دستمزد می‌دهد.</p><p>Accepting freight uses one order. Answer the speaker to send the load. After each rival move, freight travels through friendly cities. A broken route stalls it. Capture of its current stop loses the cargo. Each contract pays once.</p>','guide');
+$('restart').onclick=()=>{modal('<h2>لشکرکشی تازه؟ / New campaign?</h2><p>ذخیرهٔ این لشکرکشی جایگزین می‌شود.<br>Your current campaign save will be replaced.</p><label>مسیر / Campaign <select id="destination"><option value="west">شوش تا سارد / Susa to Sardis</option><option value="east">شوش تا بلخ / Susa to Bactra</option></select></label><br><label>درجهٔ سختی / Difficulty <select id="difficulty"><option value="scout">دیده‌بان / Scout</option><option selected value="classic">کلاسیک / Classic</option><option value="siege">محاصره / Siege</option></select></label><button id="confirm">شروع / Start</button>');$('confirm').onclick=()=>{$('modal').close();s=fresh($('difficulty').value,$('destination').value==='east'?easternGoal:0);undoState=null;planned=false;selected=11;openZone('council');saveMap();after();showSelectedCity()}};
+$('goalTitle').onclick=()=>{$('restart').click();$('destination').value=s.goal===easternGoal?'east':'west'};
+$('help').onclick=()=>modal('<h2>راهنمای شاهراه <i>Field guide</i></h2><p dir="rtl">پیش از پایان نوبت ۱۴، شوش را از راه شهرهای خودت به مقصد لشکرکشی (سارد یا بلخ) وصل کن. از دست رفتن شوش به معنی شکست است. نقشه و رقابت این بازی خیالی و الهام‌گرفته از ایران هخامنشی است.</p><p>Connect Susa to your campaign destination (Sardis or Bactra) through your cities by turn 14. Losing Susa ends the campaign. This fictional contest is inspired by Achaemenid Persia.</p><p dir="rtl">هر نوبت دو فرمان داری. از شهر متصل به پایتخت پیمان ببند، عوارض بگیر یا دژ بساز. رقیب پس از پایان نوبت یک شهر مرزی را تصرف می‌کند یا یک سطح از دژ آن می‌کاهد. سپس درآمد راه به خزانه می‌رسد.</p><p>Spend two orders per turn. Claim a neighbour of your connected network, collect tolls or fortify a city. Each turn the rival expands or weakens a frontier fort. Road income follows.</p><p dir="rtl">دیده‌بان با خزانه و درآمد بیشتر شروع می‌کند. در محاصره، رقیب به شهرهای متصل حمله می‌کند. دیدبانی هدف حرکت بعدی او را با وضعیت فعلی نقشه نشان می‌دهد.</p><p>Scout grants extra gold and income. In Siege the rival prioritises your supply line. Lookout predicts the next target on the current board.</p><p dir="rtl">هر قرارداد یک فرمان می‌خواهد. در کاروان‌سرا به صاحب بار پاسخ بده. در پایان هر نوبت، پس از حرکت رقیب، کاروان از راه شهرهای خودی پیش می‌رود. قطع راه کاروان را متوقف می‌کند؛ تصرف محل استقرارش بار را از بین می‌برد. هر قرارداد یک بار دستمزد می‌دهد.</p><p>Accepting freight uses one order. Answer the speaker to send the load. After each rival move, freight travels through friendly cities. A broken route stalls it. Capture of its current stop loses the cargo. Each contract pays once.</p>','guide');
 window.addEventListener('pagehide',()=>narrator.stop());
 function applyMapScale(){
  $('board').style.setProperty('--map-scale',zoom);
@@ -206,7 +208,7 @@ function finishGesture(event){
  }
  if(event.type==='pointerup'&&!moved&&territories){
   const point=mapPoint(event.clientX,event.clientY);
-  const city=districtAt(surface,point.x*1040,point.y*570);
+  const city=districtAt(surface,point.x*mapWidth,point.y*mapHeight);
   if(city>=0)$('pins').children[city].click();
  }
  saveMap();

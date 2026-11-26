@@ -1,16 +1,25 @@
 import {contracts} from './stories.mjs';
 // Coordinates belong to the campaign board, a stylised map.
+export const mapWidth=1600,mapHeight=640;
+export const easternGoal=19;
 export const cities = [
  ['Sardis','سارد',133,185,'palace'],['Gordium','گوردیون',305,110,'tower'],
  ['Celaenae','کلاینای',233,315,'market'],['Mazaca','مازاکا',443,202,'tower'],
  ['Tarsus','تارسوس',370,382,'market'],['Melitene','ملیتنه',569,116,'fort'],
  ['Carchemish','کرکمیش',543,328,'fort'],['Nisibis','نصیبین',697,235,'market'],
  ['Arbela','اربیل',815,134,'tower'],['Babylon','بابل',665,445,'tower'],
- ['Opis','اوپیس',817,337,'fort'],['Susa','شوش',919,448,'palace']
+ ['Opis','اوپیس',817,337,'fort'],['Susa','شوش',919,448,'palace'],
+ ['Ecbatana','هگمتانه',966,239,'fort'],['Rhagae','ری',1090,164,'market'],
+ ['Persepolis','تخت جمشید',1045,542,'palace'],['Pasargadae','پاسارگاد',1176,453,'palace'],
+ ['Salt Relay','چاپارخانهٔ کویر',1204,286,'tower'],['Artacoana','آرتاکوانا',1350,358,'fort'],
+ ['Margiana','مرو',1332,119,'market'],['Bactra','بلخ',1500,216,'tower']
 ];
-export const roads=[[0,1],[0,2],[1,3],[2,3],[2,4],[3,5],[3,6],[4,6],[5,7],[6,7],[6,9],[7,8],[7,10],[8,10],[9,10],[9,11],[10,11]];
+export const roads=[[0,1],[0,2],[1,3],[2,3],[2,4],[3,5],[3,6],[4,6],[5,7],[6,7],[6,9],[7,8],[7,10],[8,10],[9,10],[9,11],[10,11],[8,12],[11,12],[11,14],[12,13],[12,16],[13,16],[13,18],[14,15],[15,16],[15,17],[16,17],[16,18],[17,19],[18,19]];
 export const nearby=i=>roads.filter(e=>e.includes(i)).map(e=>e[0]===i?e[1]:e[0]);
 export const lines={
+ eastStart:['این بار مُهر شوش را تا بلخ ببر.','This time the Susa seal must reach Bactra.'],
+ eastWin:['مُهر شوش به بلخ رسید. راه شرق باز است.','The Susa seal has reached Bactra. The eastern road is open.'],
+ eastDeadline:['مهلت گذشت و مُهر به بلخ نرسید.','Time ran out before the seal reached Bactra.'],
  start:['شاهراه از شوش آغاز می‌شود. مُهر ما را به سارد برسان.','The road begins in Susa. Carry our seal to Sardis.'],
  join:['فرستاده با پیمان بازگشت. این شهر اکنون همراه ماست.','Our envoy returns with a treaty. This city stands with us.'],
  guard:['نگهبانان تازه به دروازه رسیدند.','Fresh guards have reached the gates.'],
@@ -22,12 +31,16 @@ export const lines={
 };
 export const deadlineText=['مهلت چهارده نوبت تمام شد. پیک به‌موقع به سارد نرسید.','Fourteen turns have passed. The courier did not reach Sardis in time.'];
 export function dispatch(s){
+ if(s.goal===easternGoal){
+  const id=s.result==='win'?'eastWin':s.result==='loss'&&s.owners[11]===1?'eastDeadline':s.last==='start'?'eastStart':null;
+  if(id)return {id,text:lines[id]};
+ }
  if(s.result==='loss'&&s.owners[11]===1)return {id:'deadline',text:deadlineText};
  const id=s.result||s.last;
  return {id,text:lines[id]};
 }
 export const modes=["scout","classic","siege"];
-export const fresh=(mode="classic")=>({mode,history:[],v:1,turn:1,ap:2,gold:mode==="scout"?12:mode==="siege"?5:8,owners:[2,0,2,0,0,0,0,0,0,0,1,1],walls:Array(12).fill(1),last:'start',result:''});
+export const fresh=(mode="classic",goal=0)=>({mode,goal,history:[],v:1,turn:1,ap:2,gold:mode==="scout"?12:mode==="siege"?5:8,owners:cities.map((_,i)=>i===11||i===10?1:(goal===easternGoal?[17,19]:[0,2]).includes(i)?2:0),walls:Array(cities.length).fill(1),last:'start',result:''});
 export function linked(s) {
  const seen=new Set(),queue=s.owners[11]===1?[11]:[];
  while(queue.length){const i=queue.pop(); if(seen.has(i))continue;seen.add(i);for(const j of nearby(i))if(s.owners[j]===1&&!seen.has(j))queue.push(j)}
@@ -35,13 +48,13 @@ export function linked(s) {
 }
 export const cost=(s,i)=>s.owners[i]===2?3+s.walls[i]:2;
 export function legal(s,i,act){
- if(s.result||s.ap<1||!Number.isInteger(i)||i<0||i>=12)return false;
+ if(s.result||s.ap<1||!Number.isInteger(i)||i<0||i>=cities.length)return false;
  if(act==='toll')return linked(s).has(i);
  if(act==='guard')return s.owners[i]===1&&s.walls[i]<3&&s.gold>=2;
  return act==='join'&&s.owners[i]!==1&&nearby(i).some(j=>linked(s).has(j))&&s.gold>=cost(s,i);
 }
 function finish(s){
- if(linked(s).has(0))s.result='win';
+ if(linked(s).has(s.goal??0))s.result='win';
  else if(s.owners[11]!==1||s.turn>14)s.result='loss';
  if(s.result)s.last=s.result;
 }
@@ -109,7 +122,7 @@ function haul(s){
 function validFreight(s){
  const ids=s.deliveries??[],f=s.freight;
  if(!Array.isArray(ids)||ids.length!==new Set(ids).size||!ids.every(i=>Number.isInteger(i)&&!!contracts[i]))return false;
- return f===undefined||!!f&&Number.isInteger(f.id)&&!!contracts[f.id]&&!ids.includes(f.id)&&Number.isInteger(f.city)&&f.city>=0&&f.city<12&&[null,0,1].includes(f.choice)&&[0,1].includes(f.delay);
+ return f===undefined||!!f&&Number.isInteger(f.id)&&!!contracts[f.id]&&!ids.includes(f.id)&&Number.isInteger(f.city)&&f.city>=0&&f.city<cities.length&&[null,0,1].includes(f.choice)&&[0,1].includes(f.delay);
 }
 
 export function advance(s){
@@ -129,7 +142,7 @@ export function itinerary(s){
  dist[11]=0;
  while(visited.size<cities.length){
   const i=dist.reduce((best,d,j)=>!visited.has(j)&&(best<0||d<dist[best])?j:best,-1);
-  if(i===0)break;
+  if(i===(s.goal??0))break;
   visited.add(i);
   for(const j of nearby(i)){
    const price=dist[i]+(s.owners[j]===1?0:cost(s,j));
@@ -137,12 +150,20 @@ export function itinerary(s){
   }
  }
  const path=[];
- for(let i=0;i!==-1;i=previous[i])path.unshift(i);
+ for(let i=s.goal??0;i!==-1;i=previous[i])path.unshift(i);
  return {path,gold:dist[0]};
 }
 export function valid(s){
  const bounded=(n,min,max)=>Number.isInteger(n)&&n>=min&&n<=max;
- return s?.v===1&&bounded(s.turn,1,15)&&bounded(s.ap,0,2)&&bounded(s.gold,0,1000)&&
- [s.owners,s.walls].every(a=>Array.isArray(a)&&a.length===12)&&s.owners.every(x=>bounded(x,0,2))&&s.walls.every(x=>bounded(x,1,3))&&
- (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=56&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,11)&&['capture','siege','toll','guard','join','commission','lost','travel','delivery'].includes(e.event)))&&validFreight(s)&&typeof s.last==='string'&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
+ return s?.v===1&&(s.goal===undefined||s.goal===0||s.goal===easternGoal)&&bounded(s.turn,1,15)&&bounded(s.ap,0,2)&&bounded(s.gold,0,1000)&&
+ [s.owners,s.walls].every(a=>Array.isArray(a)&&a.length===cities.length)&&s.owners.every(x=>bounded(x,0,2))&&s.walls.every(x=>bounded(x,1,3))&&
+ (s.mode===undefined||modes.includes(s.mode))&&(s.history===undefined||Array.isArray(s.history)&&s.history.length<=56&&s.history.every(e=>e&&bounded(e.turn,1,14)&&bounded(e.city,0,cities.length-1)&&['capture','siege','toll','guard','join','commission','lost','travel','delivery'].includes(e.event)))&&validFreight(s)&&typeof s.last==='string'&&Object.hasOwn(lines,s.last)&&['','win','loss'].includes(s.result);
+}
+
+export function resumeCampaign(s){
+ if(s?.v===1&&s.owners?.length===12&&s.walls?.length===12&&Array.isArray(s.owners)&&Array.isArray(s.walls)){
+  const extra=cities.length-12;
+  s={...s,owners:s.owners.concat(Array(extra).fill(0)),walls:s.walls.concat(Array(extra).fill(1))};
+ }
+ return valid(s)?s:null;
 }

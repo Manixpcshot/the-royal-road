@@ -11,7 +11,7 @@ async function check(browser, url, width) {
   await page.goto(url);
   const pins=page.locator('.pin');
   await pins.last().waitFor();
-  assert.equal(await pins.count(),12);
+  assert.equal(await pins.count(),20);
   const initialWidth=await page.locator('#board').evaluate(el=>el.clientWidth);
   await page.locator('#zoomIn').click();
   assert.ok(await page.locator('#board').evaluate(el=>el.clientWidth)>initialWidth);
@@ -21,7 +21,7 @@ async function check(browser, url, width) {
     const canvas=document.querySelector('#atlas'),rect=canvas.getBoundingClientRect();
     for(let y=60;y<innerHeight;y+=14)for(let x=12;x<innerWidth;x+=14){
       if(document.elementFromPoint(x,y)!==canvas)continue;
-      const index=districtAt(canvas,(x-rect.left)*1040/rect.width,(y-rect.top)*570/rect.height);
+      const index=districtAt(canvas,(x-rect.left)*1600/rect.width,(y-rect.top)*640/rect.height);
       if(index>=0&&index!==11)return {x,y,index};
     }
     throw Error('No selectable district in viewport');
@@ -72,7 +72,7 @@ async function check(browser, url, width) {
   await page.locator('#cityScene').waitFor({state:'visible'});
   await pins.first().click();
   assert.ok((await page.locator('#cityScene').getAttribute('src')).endsWith('/sardis.webp'));
-  await pins.last().click();
+  await pins.nth(11).click();
   assert.equal(await page.locator('.cargo-art').count(),3);
   assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth));
   assert.ok(await page.evaluate(()=>document.documentElement.scrollHeight<=innerHeight+1));
@@ -81,7 +81,7 @@ async function check(browser, url, width) {
   await page.locator('[data-zone=cargo]').click();
   assert.ok(await page.locator('#cargo').isVisible());
   assert.ok(await page.locator('#council').isHidden());
-  await pins.last().click();
+  await pins.nth(11).click();
   assert.ok(await page.locator('#council').isVisible());
   if(browser.browserType().name()==='chromium'){
     await page.screenshot({path:'dist/royal-road-'+width+'.png'});
@@ -156,6 +156,14 @@ async function check(browser, url, width) {
     await page.locator('#orders button').click();
   }
   assert.match(await page.locator('#modalBody').innerText(),/Victory/);
+  await page.locator('#close').click();
+  await page.locator('#goalTitle').click();
+  await page.locator('#destination').selectOption('east');
+  await page.locator('#confirm').click();
+  await page.reload();
+  assert.match(await page.locator('#goalTitle').innerText(),/Bactra/);
+  await pins.nth(19).click();assert.match(await page.locator('#city').innerText(),/Bactra/);
+  assert.ok(await page.locator('#streetArt').isVisible());
   assert.deepEqual(errors,[]);
   await page.close();
 }

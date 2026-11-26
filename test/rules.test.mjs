@@ -45,7 +45,7 @@ test('450 reproducible campaigns terminate with valid state at every step',()=>{
   let n=seed;const random=()=>((n=(Math.imul(n,1664525)+1013904223)>>>0)/4294967296);
   const s=fresh(mode);
   while(!s.result){
-   const moves=[];for(let i=0;i<12;i++)for(const a of ['join','toll','guard'])if(legal(s,i,a))moves.push([i,a]);
+   const moves=[];for(let i=0;i<s.owners.length;i++)for(const a of ['join','toll','guard'])if(legal(s,i,a))moves.push([i,a]);
    if(moves.length&&random()>.15){order(s,...moves[Math.floor(random()*moves.length)])}else advance(s);
    assert.ok(valid(s));assert.ok(s.turn<=15);
   }
@@ -75,7 +75,7 @@ test('cash shortage leaves the choice open, a free ferry waits, captured freight
 test('commission and story input validation; every performance has bilingual copy',()=>{
  const s=fresh();s.ap=0;assert.equal(commission(s,1),false);s.result='loss';s.ap=2;assert.equal(commission(s,0),false);
  assert.ok(!valid({...fresh(),freight:{}}));assert.ok(!valid({...fresh(),deliveries:[0,0]}));
- const clips=storyClips();assert.equal(clips.length,21);assert.equal(new Set(clips.map(c=>c.id)).size,21);
+ const clips=storyClips();assert.equal(clips.length,29);assert.equal(new Set(clips.map(c=>c.id)).size,29);
  for(const clip of clips)assert.ok(clip.text.every(Boolean));
 });
 
@@ -94,4 +94,24 @@ test('all six contract responses survive reload and pay exactly once',()=>{
   assert.deepEqual(s.deliveries,[id]);assert.equal(s.gold-before-roadIncome,[choice===0?3:5,8,11][id]);
   assert.equal(commission(s,id),false);assert.ok(valid(s));
  }
+});
+
+import {cities,roads,resumeCampaign,easternGoal} from '../public/rules.mjs';
+test('expanded map connects every city and a courier can win in the east',()=>{
+ const s=fresh('classic',easternGoal),seen=new Set([11]);
+ for(const i of seen)for(const j of nearby(i))seen.add(j);
+ assert.equal(seen.size,cities.length);
+ assert.equal(itinerary(s).path.at(-1),easternGoal);
+ for(const i of [12,13,18,19]){
+  if(!s.ap)advance(s);
+  if(s.gold<cost(s,i)){order(s,11,'toll');if(!s.ap)advance(s)}
+  assert.ok(order(s,i,'join'));
+ }
+ assert.equal(s.result,'win');assert.equal(dispatch(s).id,'eastWin');
+});
+test('twelve-city saves expand without changing past orders or cargo',()=>{
+ const s=fresh();commission(s,0);s.owners.length=12;s.walls.length=12;delete s.goal;
+ const restored=resumeCampaign(s);assert.ok(restored);assert.equal(restored.owners.length,cities.length);
+ assert.deepEqual(restored.freight,s.freight);assert.deepEqual(restored.history,s.history);
+ assert.deepEqual(restored.owners.slice(0,12),s.owners);assert.ok(valid(restored));
 });

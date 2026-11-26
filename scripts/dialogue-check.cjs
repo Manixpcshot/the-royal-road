@@ -56,7 +56,7 @@ async function verifyDialogue(browser, url, width){
   }finally{await context.close()}
   return paths.length;
  });
- assert.equal(tested,60);
+ assert.equal(tested,82);
 
  const {contracts,streets,voices}=await page.evaluate(async()=>{
   const {contracts,streets,voices}=await import('./stories.mjs');return {contracts,streets,voices};

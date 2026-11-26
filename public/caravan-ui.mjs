@@ -29,7 +29,9 @@ export function renderCaravan(s,selected,commit,play){
   scene.hidden=true;street.hidden=false;
   scene.onload=()=>{scene.hidden=false;street.hidden=true};
   scene.onerror=()=>{scene.hidden=true;street.hidden=false};
-  scene.dataset.city=city;scene.src='./art/city/'+city+'.webp';
+  scene.dataset.city=city;
+  if(selected>=12){scene.onload=null;scene.onerror=null;scene.removeAttribute('src')}
+  else scene.src='./art/city/'+city+'.webp';
  }
  const roleName=residents[selected],detail=el('streetText');
  const portrait=illustration('portrait/'+roleName,'speaker-portrait');

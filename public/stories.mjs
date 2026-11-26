@@ -35,9 +35,17 @@ export const streets=[
  ['پسرک تیمارگر با شنیدن زنگوله‌ها پیش از همه به آبشخور می‌دود.','At the first bell, the stable boy races everyone else to the trough.'],
  ['صدای پیمانهٔ جو از حیاط می‌آید. کاتب دوباره می‌شمارد.','A barley measure knocks against the bin. The scribe starts his count again.'],
  ['نانوا خاکستر را کنار می‌زند و از نگهبان می‌پرسد چند نفر سرِ پست‌اند.','The baker rakes the ashes aside and asks how many guards are on watch.'],
- ['گِلِ مُهر هنوز به انگشت کاتب چسبیده. پای دروازه قاطرها برای راه غرب بار می‌گیرند.','Seal clay still clings to the scribe’s fingers. At the gate, the mules are being loaded for the western road.']
+ ['گِلِ مُهر هنوز به انگشت کاتب چسبیده. پای دروازه قاطرها برای راه غرب بار می‌گیرند.','Seal clay still clings to the scribe’s fingers. At the gate, the mules are being loaded for the western road.'],
+ ["روی سنگفرش هگمتانه برف مانده. نگهبان نام پیک را می‌پرسد و چفت در را بالا می‌کشد.","Snow lingers on the paving stones of Ecbatana. The guard asks the courier’s name and lifts the latch."],
+ ["سفالگر ری کاسه را به نور می‌گیرد. از ترک مویی آب خواهد گذشت؛ این یکی برای سفر خوب نیست.","The potter of Rhagae holds a bowl to the light. Water will find the hairline crack. This one cannot travel."],
+ ["در پای پلکان، سنگ‌تراش گرد سفید را از چشم گاوِ حجاری‌شده پاک می‌کند.","At the foot of the stairway a sculptor brushes white dust from the eye of a carved bull."],
+ ["باغبان پاسارگاد سنگی را از آبراه برمی‌دارد. آب دوباره به جوی انارها می‌رسد.","The gardener at Pasargadae lifts a stone from the channel. Water reaches the pomegranates again."],
+ ["کنار چاه، پیک دو مشک را بلند می‌کند و سنگین‌تر را برای راه کویر برمی‌دارد.","Beside the well the courier lifts two waterskins and takes the heavier one for the desert crossing."],
+ ["پشت دروازهٔ آرتاکوانا، بندِ زین را با نخ سرخ می‌دوزند تا پیک در راه پارگی را پیدا کند.","Behind the gate at Artacoana a saddler uses red thread so the courier can find the repair on the road."],
+ ["در واحهٔ مرو، آب تا لبهٔ باغ بالا آمده. کاروان‌سالار بارها را به زمین خشک می‌برد.","At the oasis of Margiana the water has reached the orchard wall. The caravan master carries the bales to dry ground."],
+ ["در بازار بلخ، دبیر برای نامهٔ شوش جای خالی گذاشته. هنوز چراغش روشن است.","In the market at Bactra a scribe has left room for the letter from Susa. His lamp is still lit."]
 ];
-export const residents=['dara','rota','mina','ard','rota','dara','rota','ard','ard','mina','mina','dara'];
+export const residents=['dara','rota','mina','ard','rota','dara','rota','ard','ard','mina','mina','dara','dara','mina','ard','mina','ard','dara','rota','ard'];
 export function storyClips(){
  const clips=[];
  contracts.forEach((c,i)=>{
